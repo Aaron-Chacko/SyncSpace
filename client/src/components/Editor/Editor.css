@@ -1,0 +1,29 @@
+.code-editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.language-selector {
+  background-color: var(--bg-tertiary);
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.language-selector select {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  outline: none;
+  font-family: var(--font-sans);
+}
+
+.editor-wrapper {
+  flex: 1;
+}
