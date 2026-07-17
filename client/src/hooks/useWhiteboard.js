@@ -1,11 +1,12 @@
-import { useCallback } from 'react';
+import { useContext } from 'react';
+import { WhiteboardContext } from '../context/WhiteboardContext';
 
 const useWhiteboard = () => {
-  const initWhiteboard = useCallback((canvas) => {
-    console.log('Initializing whiteboard canvas:', canvas);
-  }, []);
-
-  return { initWhiteboard };
+  const context = useContext(WhiteboardContext);
+  if (!context) {
+    throw new Error('useWhiteboard must be used within a WhiteboardProvider');
+  }
+  return context;
 };
 
 export default useWhiteboard;
