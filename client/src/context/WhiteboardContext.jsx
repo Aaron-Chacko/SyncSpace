@@ -7,6 +7,10 @@ export const WhiteboardProvider = ({ children }) => {
   const [color, setColor] = useState('#6366f1');
   const [strokeWidth, setStrokeWidth] = useState(4);
   const [elements, setElementsState] = useState([]);
+  
+  // for Zoom & Pan
+  const [stageScale, setStageScale] = useState(1);
+  const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
 
   // for Undo and Redo
   const [history, setHistory] = useState([[]]);
@@ -58,6 +62,10 @@ export const WhiteboardProvider = ({ children }) => {
         elements,
         setElements,
         setElementsRaw: setElementsState,
+        stageScale,
+        setStageScale,
+        stagePos,
+        setStagePos,
         undo,
         redo,
         clearCanvas,

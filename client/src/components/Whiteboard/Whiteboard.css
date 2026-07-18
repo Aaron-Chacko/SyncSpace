@@ -193,3 +193,35 @@
   background-color: rgba(239, 68, 68, 0.2);
   color: var(--error);
 }
+
+/* Zoom controls */
+.zoom-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zoom-percentage {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.zoom-percentage:hover {
+  color: var(--accent-primary);
+}
+
+/* Pan hand cursor modifiers */
+.canvas-container.pan-mode {
+  cursor: grab;
+}
+
+.canvas-container.pan-mode .konvajs-content {
+  cursor: grab !important;
+}
+
+.canvas-container.pan-mode:active,
+.canvas-container.pan-mode .konvajs-content:active {
+  cursor: grabbing !important;
+}
