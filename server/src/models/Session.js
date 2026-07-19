@@ -1,8 +1,40 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
-const SessionSchema = new mongoose.Schema({
-  room: { type: mongoose.Schema.Types.ObjectId, ref: 'Room', required: true },
-  data: { type: Object }
-}, { timestamps: true });
+const sessionSchema = new mongoose.Schema(
+  {
+    room: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Room",
+      required: true,
+    },
 
-module.exports = mongoose.model('Session', SessionSchema);
+    whiteboardData: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
+
+    editorData: {
+      type: String,
+      default: "",
+    },
+
+    language: {
+      type: String,
+      default: "javascript",
+    },
+
+    participants: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const Session = mongoose.model("Session", sessionSchema);
+
+export default Session;
