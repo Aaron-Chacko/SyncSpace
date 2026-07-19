@@ -6,7 +6,6 @@ import './Whiteboard.css';
 
 const Canvas = () => {
   const containerRef = useRef(null);
-  const stageRef = useRef(null);
   const [size, setSize] = useState({ width: 800, height: 600 });
   const [isDrawing, setIsDrawing] = useState(false);
   const [newElement, setNewElement] = useState(null);
@@ -22,7 +21,8 @@ const Canvas = () => {
     stageScale,
     setStageScale,
     stagePos,
-    setStagePos
+    setStagePos,
+    stageRef
   } = useWhiteboard();
 
   // for resize canvas 

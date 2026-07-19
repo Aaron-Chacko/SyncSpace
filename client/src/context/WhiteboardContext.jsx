@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useCallback, useRef } from 'react';
 
 export const WhiteboardContext = createContext(null);
 
@@ -8,6 +8,8 @@ export const WhiteboardProvider = ({ children }) => {
   const [strokeWidth, setStrokeWidth] = useState(4);
   const [elements, setElementsState] = useState([]);
   
+  const stageRef = useRef(null);
+
   // for Zoom & Pan
   const [stageScale, setStageScale] = useState(1);
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
@@ -66,6 +68,7 @@ export const WhiteboardProvider = ({ children }) => {
         setStageScale,
         stagePos,
         setStagePos,
+        stageRef,
         undo,
         redo,
         clearCanvas,
