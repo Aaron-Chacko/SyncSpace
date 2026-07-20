@@ -1,10 +1,16 @@
 import React from 'react';
 import { Undo, Redo, Trash2, Palette, ZoomIn, ZoomOut, Maximize2, Download } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import useWhiteboard from '../../hooks/useWhiteboard';
+import { useSocketContext } from '../../context/SocketContext';
 import DrawingTools from './DrawingTools';
 import './Whiteboard.css';
 
 const Toolbar = () => {
+  const { roomId } = useParams();
+  const socket = useSocketContext();
+  const activeRoom = roomId || 'default-room';
+
   const {
     color,
     setColor,
@@ -34,6 +40,13 @@ const Toolbar = () => {
   const handleZoomReset = () => {
     setStageScale(1);
     setStagePos({ x: 0, y: 0 });
+  };
+
+  const handleClear = () => {
+    clearCanvas();
+    if (socket) {
+      socket.emit('clear-canvas', { room: activeRoom });
+    }
   };
 
   return (
@@ -124,7 +137,7 @@ const Toolbar = () => {
           <Download size={18} />
         </button>
         <button
-          onClick={clearCanvas}
+          onClick={handleClear}
           title="Clear Whiteboard"
           className="icon-button delete-button"
         >

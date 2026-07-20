@@ -9,9 +9,7 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     const newSocket = io('http://localhost:5000', { autoConnect: true });
     setSocket(newSocket);
-    return () => {
-      newSocket.close();
-    };
+    return () => newSocket.close();
   }, []);
 
   return (

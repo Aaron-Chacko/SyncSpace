@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Stage, Layer, Line, Rect, Circle, Text, Group } from 'react-konva';
+import { Stage, Layer, Line, Rect, Circle, Text, Group, Path } from 'react-konva';
 import { useParams } from 'react-router-dom';
 import useWhiteboard from '../../hooks/useWhiteboard';
 import { useSocketContext } from '../../context/SocketContext';
@@ -10,7 +10,7 @@ const Canvas = () => {
   const containerRef = useRef(null);
   const { roomId } = useParams();
   const socket = useSocketContext();
-
+  
   const [size, setSize] = useState({ width: 800, height: 600 });
   const [isDrawing, setIsDrawing] = useState(false);
   const [newElement, setNewElement] = useState(null);
@@ -32,7 +32,49 @@ const Canvas = () => {
     stageRef
   } = useWhiteboard();
 
-  // Resize canvas container to fill available area
+  const activeRoom = roomId || 'default-room';
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.emit('join-room', activeRoom);
+
+    const handleDrawElement = (remoteEl) => {
+      setElementsRaw((prev) => [...prev, remoteEl]);
+    };
+
+    const handleClearCanvas = () => {
+      setElementsRaw([]);
+    };
+
+    const handleCursorMove = (data) => {
+      setRemoteCursors((prev) => ({
+        ...prev,
+        [data.socketId]: data
+      }));
+    };
+
+    const handleCursorLeave = (data) => {
+      setRemoteCursors((prev) => {
+        const next = { ...prev };
+        delete next[data.socketId];
+        return next;
+      });
+    };
+
+    socket.on('draw-element', handleDrawElement);
+    socket.on('clear-canvas', handleClearCanvas);
+    socket.on('cursor-move', handleCursorMove);
+    socket.on('cursor-leave', handleCursorLeave);
+
+    return () => {
+      socket.off('draw-element', handleDrawElement);
+      socket.off('clear-canvas', handleClearCanvas);
+      socket.off('cursor-move', handleCursorMove);
+      socket.off('cursor-leave', handleCursorLeave);
+    };
+  }, [socket, activeRoom, setElementsRaw]);
+
   useEffect(() => {
     if (containerRef.current) {
       const handleResize = () => {
@@ -51,44 +93,6 @@ const Canvas = () => {
     }
   }, []);
 
-  // Real-time socket room joining & event listeners
-  useEffect(() => {
-    if (!socket) return;
-
-    const currentRoom = roomId || 'default-room';
-    socket.emit('join-room', currentRoom);
-
-    const handleDrawElement = (incomingElement) => {
-      setElementsRaw((prev) => {
-        if (prev.some((el) => el.id === incomingElement.id)) return prev;
-        return [...prev, incomingElement];
-      });
-    };
-
-    const handleCursorMove = (cursorData) => {
-      if (cursorData.socketId === socket.id) return;
-      setRemoteCursors((prev) => ({
-        ...prev,
-        [cursorData.socketId]: cursorData
-      }));
-    };
-
-    const handleClearCanvas = () => {
-      setElementsRaw([]);
-    };
-
-    socket.on('draw-element', handleDrawElement);
-    socket.on('cursor-move', handleCursorMove);
-    socket.on('clear-canvas', handleClearCanvas);
-
-    return () => {
-      socket.off('draw-element', handleDrawElement);
-      socket.off('cursor-move', handleCursorMove);
-      socket.off('clear-canvas', handleClearCanvas);
-    };
-  }, [socket, roomId, setElementsRaw]);
-
-  // Transform screen pointers to zoomed/panned stage coordinates
   const getRelativePointerPosition = (stage) => {
     const transform = stage.getAbsoluteTransform().copy();
     transform.invert();
@@ -118,7 +122,7 @@ const Canvas = () => {
 
     if (tool === 'pencil' || tool === 'eraser') {
       setNewElement({
-        id: Date.now().toString(),
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 5),
         type: 'line',
         points: [pointGrid.x, pointGrid.y],
         color: tool === 'eraser' ? '#1a1c26' : color,
@@ -127,7 +131,7 @@ const Canvas = () => {
       });
     } else if (tool === 'rectangle') {
       setNewElement({
-        id: Date.now().toString(),
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 5),
         type: 'rect',
         x: pointGrid.x,
         y: pointGrid.y,
@@ -138,7 +142,7 @@ const Canvas = () => {
       });
     } else if (tool === 'circle') {
       setNewElement({
-        id: Date.now().toString(),
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 5),
         type: 'circle',
         x: pointGrid.x,
         y: pointGrid.y,
@@ -148,7 +152,7 @@ const Canvas = () => {
       });
     } else if (tool === 'line') {
       setNewElement({
-        id: Date.now().toString(),
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 5),
         type: 'straight-line',
         x1: pointGrid.x,
         y1: pointGrid.y,
@@ -162,18 +166,15 @@ const Canvas = () => {
 
   const handleMouseMove = (e) => {
     const stage = e.target.getStage();
-    if (!stage) return;
     const pointGrid = getRelativePointerPosition(stage);
 
-    // Broadcast user live cursor move to the room
     if (socket) {
-      const currentRoom = roomId || 'default-room';
       socket.emit('cursor-move', {
-        roomId: currentRoom,
+        room: activeRoom,
         x: pointGrid.x,
         y: pointGrid.y,
-        userName: 'Peer User',
-        userColor: color
+        name: 'User ' + (socket.id ? socket.id.substring(0, 4) : ''),
+        color: color
       });
     }
 
@@ -220,8 +221,10 @@ const Canvas = () => {
       ) {
         setElements([...elements, newElement]);
         if (socket) {
-          const currentRoom = roomId || 'default-room';
-          socket.emit('draw-element', { roomId: currentRoom, element: newElement });
+          socket.emit('draw-element', {
+            room: activeRoom,
+            element: newElement
+          });
         }
       }
       setNewElement(null);
@@ -238,18 +241,21 @@ const Canvas = () => {
   const saveTextElement = () => {
     if (textVal.trim() && textInput) {
       const newTextEl = {
-        id: Date.now().toString(),
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 5),
         type: 'text',
         x: textInput.gridX,
         y: textInput.gridY,
         text: textVal,
         color,
-        fontSize: (strokeWidth * 3 + 14) / stageScale
+        fontSize: (strokeWidth * 3 + 14) / stageScale 
       };
       setElements([...elements, newTextEl]);
+
       if (socket) {
-        const currentRoom = roomId || 'default-room';
-        socket.emit('draw-element', { roomId: currentRoom, element: newTextEl });
+        socket.emit('draw-element', {
+          room: activeRoom,
+          element: newTextEl
+        });
       }
     }
     setTextVal('');
@@ -453,35 +459,6 @@ const Canvas = () => {
               )}
             </>
           )}
-
-          {/* Remote Teammate Cursors Overlay */}
-          {Object.values(remoteCursors).map((cursor) => (
-            <Group key={cursor.socketId} x={cursor.x} y={cursor.y}>
-              <Line
-                points={[0, 0, 0, 15, 4, 11, 8, 18, 11, 17, 7, 10, 13, 10]}
-                fill={cursor.userColor || '#6366f1'}
-                stroke="#ffffff"
-                strokeWidth={1}
-                closed={true}
-              />
-              <Rect
-                x={12}
-                y={12}
-                width={(cursor.userName.length * 7) + 12}
-                height={18}
-                fill={cursor.userColor || '#6366f1'}
-                cornerRadius={4}
-              />
-              <Text
-                x={16}
-                y={16}
-                text={cursor.userName}
-                fill="#ffffff"
-                fontSize={10}
-                fontStyle="bold"
-              />
-            </Group>
-          ))}
         </Layer>
       </Stage>
     </div>

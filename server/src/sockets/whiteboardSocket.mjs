@@ -1,36 +1,41 @@
 export default (io, socket) => {
-  // Broadcast drawing element (line, rectangle, circle, straight-line, text)
+  // Sync shape/line drawings
   socket.on('draw-element', (data) => {
-    if (data.roomId) {
-      socket.to(data.roomId).emit('draw-element', data.element);
+    if (data && data.room) {
+      socket.to(data.room).emit('draw-element', data.element);
     }
   });
 
-  // Legacy line drawing fallback
   socket.on('draw-line', (data) => {
-    const room = data.room || data.roomId;
-    if (room) {
-      socket.to(room).emit('draw-line', data);
+    if (data && data.room) {
+      socket.to(data.room).emit('draw-line', data);
     }
   });
 
-  // Broadcast user live cursor position with name
+  // Sync canvas clear
+  socket.on('clear-canvas', (data) => {
+    if (data && data.room) {
+      socket.to(data.room).emit('clear-canvas');
+    }
+  });
+
+  // Sync multiplayer mouse cursor positions
   socket.on('cursor-move', (data) => {
-    if (data.roomId) {
-      socket.to(data.roomId).emit('cursor-move', {
+    if (data && data.room) {
+      socket.to(data.room).emit('cursor-move', {
         socketId: socket.id,
         x: data.x,
         y: data.y,
-        userName: data.userName || 'Anonymous',
-        userColor: data.userColor || '#6366f1'
+        name: data.name || 'Collaborator',
+        color: data.color || '#06b6d4'
       });
     }
   });
 
-  // Broadcast clear canvas event
-  socket.on('clear-canvas', (data) => {
-    if (data.roomId) {
-      socket.to(data.roomId).emit('clear-canvas');
-    }
+  // Notify room on disconnect to clear user cursor
+  socket.on('disconnecting', () => {
+    socket.rooms.forEach((room) => {
+      socket.to(room).emit('cursor-leave', { socketId: socket.id });
+    });
   });
 };
