@@ -5,7 +5,8 @@ const sessionSchema = new mongoose.Schema(
     room: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Room",
-      required: true,
+      required: [true, "Room is required"],
+      unique: true,
     },
 
     whiteboardData: {
@@ -21,14 +22,29 @@ const sessionSchema = new mongoose.Schema(
     language: {
       type: String,
       default: "javascript",
+      trim: true,
+      lowercase: true,
+      enum: [
+        "javascript",
+        "typescript",
+        "python",
+        "java",
+        "cpp",
+        "c",
+        "go",
+        "rust",
+      ],
     },
 
-    participants: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    participants: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: true,
