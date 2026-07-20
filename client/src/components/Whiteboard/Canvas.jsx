@@ -1,16 +1,22 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Stage, Layer, Line, Rect, Circle, Text } from 'react-konva';
+import { Stage, Layer, Line, Rect, Circle, Text, Group } from 'react-konva';
+import { useParams } from 'react-router-dom';
 import useWhiteboard from '../../hooks/useWhiteboard';
+import { useSocketContext } from '../../context/SocketContext';
 import Toolbar from './Toolbar';
 import './Whiteboard.css';
 
 const Canvas = () => {
   const containerRef = useRef(null);
+  const { roomId } = useParams();
+  const socket = useSocketContext();
+
   const [size, setSize] = useState({ width: 800, height: 600 });
   const [isDrawing, setIsDrawing] = useState(false);
   const [newElement, setNewElement] = useState(null);
   const [textInput, setTextInput] = useState(null);
   const [textVal, setTextVal] = useState('');
+  const [remoteCursors, setRemoteCursors] = useState({});
 
   const {
     tool,
@@ -18,6 +24,7 @@ const Canvas = () => {
     strokeWidth,
     elements,
     setElements,
+    setElementsRaw,
     stageScale,
     setStageScale,
     stagePos,
@@ -25,7 +32,7 @@ const Canvas = () => {
     stageRef
   } = useWhiteboard();
 
-  // for resize canvas 
+  // Resize canvas container to fill available area
   useEffect(() => {
     if (containerRef.current) {
       const handleResize = () => {
@@ -44,6 +51,44 @@ const Canvas = () => {
     }
   }, []);
 
+  // Real-time socket room joining & event listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    const currentRoom = roomId || 'default-room';
+    socket.emit('join-room', currentRoom);
+
+    const handleDrawElement = (incomingElement) => {
+      setElementsRaw((prev) => {
+        if (prev.some((el) => el.id === incomingElement.id)) return prev;
+        return [...prev, incomingElement];
+      });
+    };
+
+    const handleCursorMove = (cursorData) => {
+      if (cursorData.socketId === socket.id) return;
+      setRemoteCursors((prev) => ({
+        ...prev,
+        [cursorData.socketId]: cursorData
+      }));
+    };
+
+    const handleClearCanvas = () => {
+      setElementsRaw([]);
+    };
+
+    socket.on('draw-element', handleDrawElement);
+    socket.on('cursor-move', handleCursorMove);
+    socket.on('clear-canvas', handleClearCanvas);
+
+    return () => {
+      socket.off('draw-element', handleDrawElement);
+      socket.off('cursor-move', handleCursorMove);
+      socket.off('clear-canvas', handleClearCanvas);
+    };
+  }, [socket, roomId, setElementsRaw]);
+
+  // Transform screen pointers to zoomed/panned stage coordinates
   const getRelativePointerPosition = (stage) => {
     const transform = stage.getAbsoluteTransform().copy();
     transform.invert();
@@ -52,7 +97,6 @@ const Canvas = () => {
   };
 
   const handleMouseDown = (e) => {
-    // If clicking on text area input, or if using pan tool, ignore drawing
     if (textInput || tool === 'pan') return;
 
     const stage = e.target.getStage();
@@ -117,10 +161,23 @@ const Canvas = () => {
   };
 
   const handleMouseMove = (e) => {
-    if (!isDrawing || !newElement) return;
-
     const stage = e.target.getStage();
+    if (!stage) return;
     const pointGrid = getRelativePointerPosition(stage);
+
+    // Broadcast user live cursor move to the room
+    if (socket) {
+      const currentRoom = roomId || 'default-room';
+      socket.emit('cursor-move', {
+        roomId: currentRoom,
+        x: pointGrid.x,
+        y: pointGrid.y,
+        userName: 'Peer User',
+        userColor: color
+      });
+    }
+
+    if (!isDrawing || !newElement) return;
 
     if (newElement.type === 'line') {
       setNewElement({
@@ -162,6 +219,10 @@ const Canvas = () => {
         (newElement.type === 'straight-line' && (Math.abs(newElement.x2 - newElement.x1) > 1 || Math.abs(newElement.y2 - newElement.y1) > 1))
       ) {
         setElements([...elements, newElement]);
+        if (socket) {
+          const currentRoom = roomId || 'default-room';
+          socket.emit('draw-element', { roomId: currentRoom, element: newElement });
+        }
       }
       setNewElement(null);
     }
@@ -183,9 +244,13 @@ const Canvas = () => {
         y: textInput.gridY,
         text: textVal,
         color,
-        fontSize: (strokeWidth * 3 + 14) / stageScale 
+        fontSize: (strokeWidth * 3 + 14) / stageScale
       };
       setElements([...elements, newTextEl]);
+      if (socket) {
+        const currentRoom = roomId || 'default-room';
+        socket.emit('draw-element', { roomId: currentRoom, element: newTextEl });
+      }
     }
     setTextVal('');
     setTextInput(null);
@@ -217,7 +282,6 @@ const Canvas = () => {
   };
 
   const handleStageDragEnd = (e) => {
-  
     if (e.target === stageRef.current) {
       setStagePos({
         x: e.target.x(),
@@ -389,6 +453,35 @@ const Canvas = () => {
               )}
             </>
           )}
+
+          {/* Remote Teammate Cursors Overlay */}
+          {Object.values(remoteCursors).map((cursor) => (
+            <Group key={cursor.socketId} x={cursor.x} y={cursor.y}>
+              <Line
+                points={[0, 0, 0, 15, 4, 11, 8, 18, 11, 17, 7, 10, 13, 10]}
+                fill={cursor.userColor || '#6366f1'}
+                stroke="#ffffff"
+                strokeWidth={1}
+                closed={true}
+              />
+              <Rect
+                x={12}
+                y={12}
+                width={(cursor.userName.length * 7) + 12}
+                height={18}
+                fill={cursor.userColor || '#6366f1'}
+                cornerRadius={4}
+              />
+              <Text
+                x={16}
+                y={16}
+                text={cursor.userName}
+                fill="#ffffff"
+                fontSize={10}
+                fontStyle="bold"
+              />
+            </Group>
+          ))}
         </Layer>
       </Stage>
     </div>
