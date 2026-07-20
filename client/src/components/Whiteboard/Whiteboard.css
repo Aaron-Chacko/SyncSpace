@@ -5,30 +5,33 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
-}
-
-#whiteboard-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
+  display: flex;
+  flex-direction: column;
 }
 
 .whiteboard-toolbar {
   position: absolute;
-  top: 20px;
+  top: 15px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: rgba(18, 19, 26, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 6px 14px;
+  border-radius: 50px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  max-width: 95%;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .drawing-tools {
   display: flex;
-  gap: 10px;
-  background-color: rgba(18, 19, 26, 0.85);
-  backdrop-filter: blur(10px);
-  padding: 8px 16px;
-  border-radius: 50px;
-  border: 1px solid var(--border-color);
+  gap: 4px;
 }
 
 .drawing-tools button {
@@ -39,9 +42,186 @@
   padding: 8px;
   border-radius: 50%;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .drawing-tools button:hover {
   background-color: var(--border-color);
   color: var(--accent-primary);
+}
+
+.drawing-tools button.active {
+  background-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-color);
+  margin: 0 4px;
+}
+
+/* Color Presets */
+.color-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-preset {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+}
+
+.color-preset:hover {
+  transform: scale(1.15);
+}
+
+.color-preset.active {
+  border-color: var(--text-primary);
+  transform: scale(1.15);
+}
+
+/* Custom Color Picker input */
+.custom-color-picker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.custom-color-picker:hover {
+  background-color: var(--border-color);
+  color: var(--accent-secondary);
+}
+
+.custom-color-picker input[type="color"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+}
+
+/* Size Slider styles */
+.size-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.size-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  min-width: 28px;
+  font-weight: 500;
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.size-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 70px;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+  outline: none;
+}
+
+.size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.size-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: var(--accent-primary-hover);
+}
+
+/* History buttons */
+.history-section {
+  display: flex;
+  gap: 4px;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-button:hover:not(:disabled) {
+  background-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.icon-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.icon-button.delete-button:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: var(--error);
+}
+
+/* Zoom controls */
+.zoom-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zoom-percentage {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.zoom-percentage:hover {
+  color: var(--accent-primary);
+}
+
+/* Pan hand cursor modifiers */
+.canvas-container.pan-mode {
+  cursor: grab;
+}
+
+.canvas-container.pan-mode .konvajs-content {
+  cursor: grab !important;
+}
+
+.canvas-container.pan-mode:active,
+.canvas-container.pan-mode .konvajs-content:active {
+  cursor: grabbing !important;
 }

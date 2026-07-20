@@ -1,4 +1,4 @@
-const Y = require('yjs');
+import Y from 'yjs';
 
 class YjsService {
   constructor() {
@@ -13,4 +13,4 @@ class YjsService {
   }
 }
 
-module.exports = new YjsService();
+export default new YjsService();
