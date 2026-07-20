@@ -1,5 +1,5 @@
 import React from 'react';
-import { Undo, Redo, Trash2, Palette, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { Undo, Redo, Trash2, Palette, ZoomIn, ZoomOut, Maximize2, Download } from 'lucide-react';
 import useWhiteboard from '../../hooks/useWhiteboard';
 import DrawingTools from './DrawingTools';
 import './Whiteboard.css';
@@ -13,6 +13,7 @@ const Toolbar = () => {
     undo,
     redo,
     clearCanvas,
+    exportAsImage,
     canUndo,
     canRedo,
     stageScale,
@@ -97,7 +98,7 @@ const Toolbar = () => {
 
       <div className="toolbar-divider" />
 
-      {/* History Controls */}
+      {/* History & Action Controls */}
       <div className="history-section">
         <button
           onClick={undo}
@@ -114,6 +115,13 @@ const Toolbar = () => {
           className="icon-button"
         >
           <Redo size={18} />
+        </button>
+        <button
+          onClick={() => exportAsImage()}
+          title="Export Canvas as PNG Image"
+          className="icon-button download-button"
+        >
+          <Download size={18} />
         </button>
         <button
           onClick={clearCanvas}
