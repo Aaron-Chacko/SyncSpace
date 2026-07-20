@@ -6,6 +6,12 @@ export default (io, socket) => {
     }
   });
 
+  socket.on('update-element', (data) => {
+    if (data && data.room) {
+      socket.to(data.room).emit('update-element', data.element);
+    }
+  });
+
   socket.on('draw-line', (data) => {
     if (data && data.room) {
       socket.to(data.room).emit('draw-line', data);
@@ -16,6 +22,13 @@ export default (io, socket) => {
   socket.on('clear-canvas', (data) => {
     if (data && data.room) {
       socket.to(data.room).emit('clear-canvas');
+    }
+  });
+
+  // Sync code editor changes
+  socket.on('code-change', (data) => {
+    if (data && data.room) {
+      socket.to(data.room).emit('code-change', data);
     }
   });
 

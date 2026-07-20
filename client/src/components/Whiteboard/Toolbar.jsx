@@ -1,5 +1,5 @@
 import React from 'react';
-import { Undo, Redo, Trash2, Palette, ZoomIn, ZoomOut, Maximize2, Download } from 'lucide-react';
+import { Undo, Redo, Trash2, Palette, ZoomIn, ZoomOut, Maximize2, Download, ArrowUp, ArrowDown, Copy, CopyPlus, Trash, PaintBucket } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import useWhiteboard from '../../hooks/useWhiteboard';
 import { useSocketContext } from '../../context/SocketContext';
@@ -14,12 +14,22 @@ const Toolbar = () => {
   const {
     color,
     setColor,
+    fillColor,
+    setFillColor,
+    opacity,
+    setOpacity,
     strokeWidth,
     setStrokeWidth,
     undo,
     redo,
     clearCanvas,
     exportAsImage,
+    selectedId,
+    deleteSelected,
+    bringToFront,
+    sendToBack,
+    copySelected,
+    duplicateSelected,
     canUndo,
     canRedo,
     stageScale,
@@ -27,7 +37,7 @@ const Toolbar = () => {
     setStagePos
   } = useWhiteboard();
 
-  const presets = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ffffff'];
+  const strokePresets = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ffffff'];
 
   const handleZoomIn = () => {
     setStageScale((prev) => Math.min(10, prev * 1.15));
@@ -55,9 +65,9 @@ const Toolbar = () => {
       
       <div className="toolbar-divider" />
       
-      {/* Preset Colors */}
-      <div className="color-section">
-        {presets.map((c) => (
+      {/* Stroke Colors */}
+      <div className="color-section" title="Stroke Color">
+        {strokePresets.map((c) => (
           <button
             key={c}
             className={`color-preset ${color === c ? 'active' : ''}`}
@@ -65,8 +75,7 @@ const Toolbar = () => {
             onClick={() => setColor(c)}
           />
         ))}
-        {/* Custom Color Input */}
-        <label className="custom-color-picker" title="Custom Color">
+        <label className="custom-color-picker" title="Stroke Color">
           <Palette size={16} />
           <input
             type="color"
@@ -78,12 +87,32 @@ const Toolbar = () => {
 
       <div className="toolbar-divider" />
 
-      {/* Brush Size */}
-      <div className="size-section">
+      {/* Fill Color */}
+      <div className="color-section" title="Fill Color">
+        <label className="custom-color-picker" title="Fill Color">
+          <PaintBucket size={16} color={fillColor === 'transparent' ? '#94a3b8' : fillColor} />
+          <input
+            type="color"
+            value={fillColor === 'transparent' ? '#ffffff' : fillColor}
+            onChange={(e) => setFillColor(e.target.value)}
+          />
+        </label>
+        <button
+          className={`color-preset ${fillColor === 'transparent' ? 'active' : ''}`}
+          style={{ background: 'linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)', backgroundSize: '8px 8px', border: '1px solid var(--border-color)' }}
+          onClick={() => setFillColor('transparent')}
+          title="Transparent Fill"
+        />
+      </div>
+
+      <div className="toolbar-divider" />
+
+      {/* Brush Size & Opacity */}
+      <div className="size-section" title="Stroke Width">
         <span className="size-label">{strokeWidth}px</span>
         <input
           type="range"
-          min="2"
+          min="1"
           max="30"
           value={strokeWidth}
           onChange={(e) => setStrokeWidth(Number(e.target.value))}
@@ -91,7 +120,44 @@ const Toolbar = () => {
         />
       </div>
 
+      <div className="size-section" title="Opacity">
+        <span className="size-label">{Math.round(opacity * 100)}%</span>
+        <input
+          type="range"
+          min="0.1"
+          max="1"
+          step="0.05"
+          value={opacity}
+          onChange={(e) => setOpacity(Number(e.target.value))}
+          className="size-slider"
+        />
+      </div>
+
       <div className="toolbar-divider" />
+
+      {/* Selected Object Manipulation Controls */}
+      {selectedId && (
+        <>
+          <div className="history-section" title="Object Controls">
+            <button onClick={bringToFront} title="Bring to Front" className="icon-button">
+              <ArrowUp size={16} />
+            </button>
+            <button onClick={sendToBack} title="Send to Back" className="icon-button">
+              <ArrowDown size={16} />
+            </button>
+            <button onClick={copySelected} title="Copy Selected" className="icon-button">
+              <Copy size={16} />
+            </button>
+            <button onClick={duplicateSelected} title="Duplicate Selected" className="icon-button">
+              <CopyPlus size={16} />
+            </button>
+            <button onClick={deleteSelected} title="Delete Selected" className="icon-button delete-button">
+              <Trash size={16} />
+            </button>
+          </div>
+          <div className="toolbar-divider" />
+        </>
+      )}
 
       {/* Zoom Controls */}
       <div className="zoom-section">

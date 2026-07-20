@@ -1,61 +1,103 @@
 import React from 'react';
-import { Pencil, Square, Circle, Eraser, Type, Minus, Hand } from 'lucide-react';
+import { MousePointer, Hand, Pencil, Minus, ArrowRight, Square, Circle, Disc, StickyNote, Type, Image as ImageIcon, Eraser } from 'lucide-react';
 import useWhiteboard from '../../hooks/useWhiteboard';
 import './Whiteboard.css';
 
 const DrawingTools = () => {
-  const { tool, setTool } = useWhiteboard();
+  const { tool, setTool, setSelectedId } = useWhiteboard();
+
+  const handleSelectTool = (newTool) => {
+    setTool(newTool);
+    if (newTool !== 'select') {
+      setSelectedId(null);
+    }
+  };
 
   return (
     <div className="drawing-tools">
       <button
-        title="Pan/Hand Tool"
+        title="Selection Tool (Select, Move, Resize)"
+        className={tool === 'select' ? 'active' : ''}
+        onClick={() => handleSelectTool('select')}
+      >
+        <MousePointer size={18} />
+      </button>
+      <button
+        title="Pan / Hand Tool"
         className={tool === 'pan' ? 'active' : ''}
-        onClick={() => setTool('pan')}
+        onClick={() => handleSelectTool('pan')}
       >
-        <Hand size={20} />
+        <Hand size={18} />
       </button>
       <button
-        title="Pencil"
+        title="Pencil (Freehand)"
         className={tool === 'pencil' ? 'active' : ''}
-        onClick={() => setTool('pencil')}
+        onClick={() => handleSelectTool('pencil')}
       >
-        <Pencil size={20} />
+        <Pencil size={18} />
       </button>
       <button
-        title="Line"
+        title="Straight Line"
         className={tool === 'line' ? 'active' : ''}
-        onClick={() => setTool('line')}
+        onClick={() => handleSelectTool('line')}
       >
-        <Minus size={20} style={{ transform: 'rotate(-45deg)' }} />
+        <Minus size={18} style={{ transform: 'rotate(-45deg)' }} />
+      </button>
+      <button
+        title="Arrow Line"
+        className={tool === 'arrow' ? 'active' : ''}
+        onClick={() => handleSelectTool('arrow')}
+      >
+        <ArrowRight size={18} style={{ transform: 'rotate(-45deg)' }} />
       </button>
       <button
         title="Rectangle"
         className={tool === 'rectangle' ? 'active' : ''}
-        onClick={() => setTool('rectangle')}
+        onClick={() => handleSelectTool('rectangle')}
       >
-        <Square size={20} />
+        <Square size={18} />
       </button>
       <button
         title="Circle"
         className={tool === 'circle' ? 'active' : ''}
-        onClick={() => setTool('circle')}
+        onClick={() => handleSelectTool('circle')}
       >
-        <Circle size={20} />
+        <Circle size={18} />
+      </button>
+      <button
+        title="Ellipse"
+        className={tool === 'ellipse' ? 'active' : ''}
+        onClick={() => handleSelectTool('ellipse')}
+      >
+        <Disc size={18} />
+      </button>
+      <button
+        title="Sticky Note"
+        className={tool === 'sticky' ? 'active' : ''}
+        onClick={() => handleSelectTool('sticky')}
+      >
+        <StickyNote size={18} />
+      </button>
+      <button
+        title="Text"
+        className={tool === 'text' ? 'active' : ''}
+        onClick={() => handleSelectTool('text')}
+      >
+        <Type size={18} />
+      </button>
+      <button
+        title="Image Upload"
+        className={tool === 'image' ? 'active' : ''}
+        onClick={() => handleSelectTool('image')}
+      >
+        <ImageIcon size={18} />
       </button>
       <button
         title="Eraser"
         className={tool === 'eraser' ? 'active' : ''}
-        onClick={() => setTool('eraser')}
+        onClick={() => handleSelectTool('eraser')}
       >
-        <Eraser size={20} />
-      </button>
-      <button
-        title="Text Tool"
-        className={tool === 'text' ? 'active' : ''}
-        onClick={() => setTool('text')}
-      >
-        <Type size={20} />
+        <Eraser size={18} />
       </button>
     </div>
   );
