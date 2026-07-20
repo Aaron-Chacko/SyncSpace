@@ -52,6 +52,18 @@ export const WhiteboardProvider = ({ children }) => {
     setElements([]);
   }, [setElements]);
 
+  // Export Stage drawings as high-resolution PNG image
+  const exportAsImage = useCallback((fileName = 'whiteboard.png') => {
+    if (!stageRef.current) return;
+    const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = uri;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [stageRef]);
+
   return (
     <WhiteboardContext.Provider
       value={{
@@ -72,6 +84,7 @@ export const WhiteboardProvider = ({ children }) => {
         undo,
         redo,
         clearCanvas,
+        exportAsImage,
         canUndo: historyIndex > 0,
         canRedo: historyIndex < history.length - 1,
       }}
