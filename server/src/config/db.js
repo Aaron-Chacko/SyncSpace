@@ -9,7 +9,7 @@ const connectDB = async () => {
     );
   } catch (error) {
     console.error("❌ MongoDB Connection Failed:", error.message);
-    console.warn("⚠️ Server will continue running without MongoDB persistence.");
+    process.exit(1);
   }
 };
 
