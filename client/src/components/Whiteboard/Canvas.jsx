@@ -371,7 +371,7 @@ const Canvas = () => {
 
     if (newElement) {
       if (
-        (newElement.type === 'line' && newElement.points.length > 2) ||
+        (newElement.type === 'line' && newElement.points.length >= 2) ||
         (newElement.type === 'rect' && Math.abs(newElement.width) > 1 && Math.abs(newElement.height) > 1) ||
         (newElement.type === 'circle' && newElement.radius > 1) ||
         (newElement.type === 'ellipse' && newElement.radiusX > 1 && newElement.radiusY > 1) ||
