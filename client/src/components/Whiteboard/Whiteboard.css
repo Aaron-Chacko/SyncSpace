@@ -12,22 +12,23 @@
 
 .whiteboard-toolbar {
   position: absolute;
-  top: 15px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 12px;
-  background-color: rgba(18, 19, 26, 0.85);
+  gap: 8px;
+  background-color: rgba(18, 19, 26, 0.92);
   backdrop-filter: blur(12px);
-  padding: 6px 14px;
+  padding: 4px 10px;
   border-radius: 50px;
   border: 1px solid var(--border-color);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  max-width: 95%;
-  flex-wrap: wrap;
-  justify-content: center;
+  max-width: 98%;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .drawing-tools {
