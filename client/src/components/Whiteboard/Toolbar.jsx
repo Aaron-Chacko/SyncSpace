@@ -1,5 +1,5 @@
 import React from 'react';
-import { Undo, Redo, Trash2, Palette } from 'lucide-react';
+import { Undo, Redo, Trash2, Palette, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import useWhiteboard from '../../hooks/useWhiteboard';
 import DrawingTools from './DrawingTools';
 import './Whiteboard.css';
@@ -14,10 +14,26 @@ const Toolbar = () => {
     redo,
     clearCanvas,
     canUndo,
-    canRedo
+    canRedo,
+    stageScale,
+    setStageScale,
+    setStagePos
   } = useWhiteboard();
 
   const presets = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ffffff'];
+
+  const handleZoomIn = () => {
+    setStageScale((prev) => Math.min(10, prev * 1.15));
+  };
+
+  const handleZoomOut = () => {
+    setStageScale((prev) => Math.max(0.1, prev / 1.15));
+  };
+
+  const handleZoomReset = () => {
+    setStageScale(1);
+    setStagePos({ x: 0, y: 0 });
+  };
 
   return (
     <div className="whiteboard-toolbar">
@@ -59,6 +75,24 @@ const Toolbar = () => {
           onChange={(e) => setStrokeWidth(Number(e.target.value))}
           className="size-slider"
         />
+      </div>
+
+      <div className="toolbar-divider" />
+
+      {/* Zoom Controls */}
+      <div className="zoom-section">
+        <button onClick={handleZoomOut} title="Zoom Out" className="icon-button">
+          <ZoomOut size={16} />
+        </button>
+        <span className="zoom-percentage" onClick={handleZoomReset} title="Reset Zoom" style={{ cursor: 'pointer', fontSize: '11px', color: 'var(--text-secondary)', minWidth: '38px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>
+          {Math.round(stageScale * 100)}%
+        </span>
+        <button onClick={handleZoomIn} title="Zoom In" className="icon-button">
+          <ZoomIn size={16} />
+        </button>
+        <button onClick={handleZoomReset} title="Reset Viewport" className="icon-button">
+          <Maximize2 size={15} />
+        </button>
       </div>
 
       <div className="toolbar-divider" />
