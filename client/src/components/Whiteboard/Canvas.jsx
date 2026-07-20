@@ -48,6 +48,7 @@ const Canvas = () => {
     };
 
     const handleCursorMove = (data) => {
+      if (socket && data.socketId === socket.id) return;
       setRemoteCursors((prev) => ({
         ...prev,
         [data.socketId]: data
@@ -94,9 +95,11 @@ const Canvas = () => {
   }, []);
 
   const getRelativePointerPosition = (stage) => {
+    if (!stage) return { x: 0, y: 0 };
+    const pos = stage.getPointerPosition();
+    if (!pos) return { x: 0, y: 0 };
     const transform = stage.getAbsoluteTransform().copy();
     transform.invert();
-    const pos = stage.getPointerPosition();
     return transform.point(pos);
   };
 
@@ -104,7 +107,8 @@ const Canvas = () => {
     if (textInput || tool === 'pan') return;
 
     const stage = e.target.getStage();
-    const pointScreen = stage.getPointerPosition();
+    const pointScreen = stage ? stage.getPointerPosition() : null;
+    if (!pointScreen) return;
     const pointGrid = getRelativePointerPosition(stage);
 
     if (tool === 'text') {
@@ -166,6 +170,7 @@ const Canvas = () => {
 
   const handleMouseMove = (e) => {
     const stage = e.target.getStage();
+    if (!stage) return;
     const pointGrid = getRelativePointerPosition(stage);
 
     if (socket) {
@@ -264,21 +269,25 @@ const Canvas = () => {
 
   const handleWheel = (e) => {
     e.evt.preventDefault();
-    const scaleBy = 1.08;
     const stage = stageRef.current;
     if (!stage) return;
 
-    const oldScale = stage.scaleX();
     const pointer = stage.getPointerPosition();
     if (!pointer) return;
+
+    if (Math.abs(e.evt.deltaY) < 2) return;
+
+    const oldScale = stage.scaleX();
+    const scaleBy = 1.05;
 
     const mousePointTo = {
       x: (pointer.x - stage.x()) / oldScale,
       y: (pointer.y - stage.y()) / oldScale,
     };
 
-    const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
-    const boundedScale = Math.max(0.1, Math.min(10, newScale));
+    const direction = e.evt.deltaY > 0 ? -1 : 1;
+    const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    const boundedScale = Math.max(0.2, Math.min(5, newScale));
 
     setStageScale(boundedScale);
     setStagePos({
