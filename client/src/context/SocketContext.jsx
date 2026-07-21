@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
 const SocketContext = createContext(null);
 
@@ -7,9 +7,21 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io('http://localhost:5000', { autoConnect: false });
+    const newSocket = io("http://localhost:5000");
+
+    newSocket.on("connect", () => {
+      console.log("🟢 Connected:", newSocket.id);
+    });
+
+    newSocket.on("disconnect", () => {
+      console.log("🔴 Disconnected");
+    });
+
     setSocket(newSocket);
-    return () => newSocket.close();
+
+    return () => {
+      newSocket.disconnect();
+    };
   }, []);
 
   return (
