@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useCallback, useRef } from 'react';
 
 export const WhiteboardContext = createContext(null);
 
@@ -7,6 +7,12 @@ export const WhiteboardProvider = ({ children }) => {
   const [color, setColor] = useState('#6366f1');
   const [strokeWidth, setStrokeWidth] = useState(4);
   const [elements, setElementsState] = useState([]);
+  
+  const stageRef = useRef(null);
+
+  // for Zoom & Pan
+  const [stageScale, setStageScale] = useState(1);
+  const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
 
   // for Undo and Redo
   const [history, setHistory] = useState([[]]);
@@ -46,6 +52,18 @@ export const WhiteboardProvider = ({ children }) => {
     setElements([]);
   }, [setElements]);
 
+  // Export Stage drawings as high-resolution PNG image
+  const exportAsImage = useCallback((fileName = 'whiteboard.png') => {
+    if (!stageRef.current) return;
+    const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = uri;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [stageRef]);
+
   return (
     <WhiteboardContext.Provider
       value={{
@@ -58,9 +76,15 @@ export const WhiteboardProvider = ({ children }) => {
         elements,
         setElements,
         setElementsRaw: setElementsState,
+        stageScale,
+        setStageScale,
+        stagePos,
+        setStagePos,
+        stageRef,
         undo,
         redo,
         clearCanvas,
+        exportAsImage,
         canUndo: historyIndex > 0,
         canRedo: historyIndex < history.length - 1,
       }}

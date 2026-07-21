@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import { SOCKET_EVENTS } from "../shared/socketEvents.js";
+import editorSocketHandler from "./editorSocket.js";
 
 export function initializeSocket(server) {
   const io = new Server(server, {
@@ -9,7 +10,7 @@ export function initializeSocket(server) {
     },
   });
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
     console.log(`🟢 User connected: ${socket.id}`);
 
     socket.on(SOCKET_EVENTS.JOIN_ROOM, (roomCode) => {
@@ -33,6 +34,15 @@ export function initializeSocket(server) {
         roomCode,
       });
     });
+
+    try {
+      const { default: whiteboardSocketHandler } = await import("./whiteboardSocket.mjs");
+      whiteboardSocketHandler(io, socket);
+    } catch (err) {
+      console.error("Failed to load whiteboardSocket ESM module:", err);
+    }
+
+    editorSocketHandler(io, socket);
 
     socket.on("disconnect", () => {
       console.log(`🔴 User disconnected: ${socket.id}`);
