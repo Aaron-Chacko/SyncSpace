@@ -92,7 +92,18 @@ const Canvas = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.emit('join-room', activeRoom);
+    const joinRoom = () => {
+      socket.emit('join-room', activeRoom);
+      console.log(`⚡ Joined room ${activeRoom} successfully via Socket.IO!`);
+    };
+
+    if (socket.connected) {
+      joinRoom();
+    } else {
+      socket.connect();
+    }
+
+    socket.on('connect', joinRoom);
 
     const handleDrawElement = (remoteEl) => {
       setElementsRaw((prev) => [...prev, remoteEl]);
@@ -130,6 +141,7 @@ const Canvas = () => {
     socket.on('cursor-leave', handleCursorLeave);
 
     return () => {
+      socket.off('connect', joinRoom);
       socket.off('draw-element', handleDrawElement);
       socket.off('update-element', handleUpdateElement);
       socket.off('clear-canvas', handleClearCanvas);

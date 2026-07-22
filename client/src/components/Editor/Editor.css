@@ -2,19 +2,11 @@
 
 .code-editor-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   height: 100%;
   background: var(--bg-darker, #1a1a2e);
   position: relative;
   overflow: hidden;
-}
-
-.editor-main-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-width: 0;
 }
 
 /* ============================================
@@ -59,7 +51,7 @@
   height: 26px;
   cursor: pointer;
   outline: none;
-  font-family: var(--font-sans);
+  transition: border-color 0.2s ease;
 }
 
 .toolbar-select:hover {
@@ -75,6 +67,7 @@
   cursor: pointer;
   font-size: 11px;
   height: 26px;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -105,15 +98,18 @@
   font-size: 12px;
   font-weight: 500;
   height: 26px;
+  transition: all 0.2s ease;
 }
 
 .save-btn:hover:not(:disabled) {
   background: #5A4BD1;
+  transform: scale(1.02);
 }
 
 .save-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 /* ============================================
@@ -163,6 +159,7 @@
   height: 6px;
   border-radius: 50%;
   background: #4ECDC4;
+  animation: pulse 1.5s infinite;
 }
 
 /* ============================================
@@ -172,16 +169,13 @@
   flex: 1;
   position: relative;
   min-height: 0;
-  height: 100%;
 }
 
 /* ============================================
    REMOTE CURSORS
    ============================================ */
 .remote-cursor {
-  position: absolute;
-  pointer-events: none;
-  z-index: 100;
+  transition: top 0.1s ease, left 0.1s ease;
 }
 
 /* ============================================
@@ -207,4 +201,75 @@
   font-weight: 500;
   opacity: 0.9;
   white-space: nowrap;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .editor-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 4px 8px;
+  }
+  
+  .toolbar-left,
+  .toolbar-center,
+  .toolbar-right {
+    justify-content: center;
+  }
+  
+  .toolbar-select {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  
+  .toolbar-btn {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  
+  .save-btn {
+    font-size: 11px;
+    padding: 2px 10px;
+  }
+  
+  .last-saved {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar-left,
+  .toolbar-center,
+  .toolbar-right {
+    gap: 3px;
+  }
+  
+  .toolbar-select {
+    font-size: 9px;
+    padding: 1px 4px;
+    height: 22px;
+  }
+  
+  .toolbar-btn {
+    font-size: 9px;
+    padding: 1px 4px;
+    height: 22px;
+  }
+  
+  .save-btn {
+    font-size: 10px;
+    padding: 1px 8px;
+    height: 22px;
+  }
 }
