@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 import app from "./app.js";
 import connectDB from "./config/db.js";
-import { initSocket } from "./sockets/socket.mjs";
+import { initializeSocket } from "./sockets/index.js";
 
 dotenv.config();
 
@@ -13,6 +13,8 @@ async function startServer() {
 
     const server = http.createServer(app);
     initSocket(server);
+
+    initializeSocket(server);
 
     const PORT = process.env.PORT || 5000;
 
