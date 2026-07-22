@@ -1,19 +1,20 @@
-const express = require('express');
-const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
-const roomRoutes = require('./routes/roomRoutes');
-const sessionRoutes = require('./routes/sessionRoutes');
-const errorMiddleware = require('./middleware/errorMiddleware');
+import express from "express";
+import cors from "cors";
+
+import authRoutes from "./routes/authRoutes.js";
+import roomRoutes from "./routes/roomRoutes.js";
+import sessionRoutes from "./routes/sessionRoutes.js";
+import errorMiddleware from "./middleware/errorMiddleware.js";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
-app.use('/api/rooms', roomRoutes);
-app.use('/api/sessions', sessionRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/rooms", roomRoutes);
+app.use("/api/sessions", sessionRoutes);
 
 app.use(errorMiddleware);
 
-module.exports = app;
+export default app;
