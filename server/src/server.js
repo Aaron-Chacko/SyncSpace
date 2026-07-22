@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 
 import app from "./app.js";
 import connectDB from "./config/db.js";
+import { initializeSocket } from "./sockets/index.js";
 
 dotenv.config();
 
@@ -11,6 +12,8 @@ async function startServer() {
     await connectDB();
 
     const server = http.createServer(app);
+
+    initializeSocket(server);
 
     const PORT = process.env.PORT || 5000;
 
