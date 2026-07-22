@@ -1,35 +1,47 @@
-const User = require('../models/User');
-const generateToken = require('../utils/generateToken');
+import User from "../models/User.js";
+import generateToken from "../utils/generateToken.js";
 
 class AuthService {
   async signup({ name, email, password }) {
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
-      const error = new Error('User already exists');
+      const error = new Error("User already exists");
       error.statusCode = 409;
       throw error;
     }
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({
+      name,
+      email,
+      password,
+    });
+
     const token = generateToken(user._id);
 
     return {
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
     };
   }
 
   async login({ email, password }) {
     const user = await User.findOne({ email });
+
     if (!user) {
-      const error = new Error('Invalid credentials');
+      const error = new Error("Invalid email or password");
       error.statusCode = 401;
       throw error;
     }
 
     const isMatch = await user.comparePassword(password);
+
     if (!isMatch) {
-      const error = new Error('Invalid credentials');
+      const error = new Error("Invalid email or password");
       error.statusCode = 401;
       throw error;
     }
@@ -38,9 +50,13 @@ class AuthService {
 
     return {
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
     };
   }
 }
 
-module.exports = new AuthService();
+export default new AuthService();
