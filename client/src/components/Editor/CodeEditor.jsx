@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 import * as Y from 'yjs';
 import { MonacoBinding } from 'y-monaco';
-import { awarenessProtocol } from 'y-protocols/awareness';
+import * as awarenessProtocol from 'y-protocols/awareness';
 import { v4 as uuidv4 } from 'uuid';
 import LanguageSelector from './LanguageSelector';
 import './Editor.css';
