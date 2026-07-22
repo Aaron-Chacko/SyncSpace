@@ -1,24 +1,26 @@
-import React, { createContext, useContext, useEffect } from 'react';
-import socket from '../services/socket';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
 const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
+  const [socket, setSocket] = useState(null);
+
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('🔌 Socket.IO connected successfully to backend server! ID:', socket.id);
-    });
-    socket.on('connect_error', (err) => {
-      console.error('❌ Socket.IO connection error details:', err.message);
-    });
-    socket.on('disconnect', (reason) => {
-      console.warn('🔌 Socket.IO disconnected from backend server:', reason);
+    const newSocket = io("http://localhost:5000");
+
+    newSocket.on("connect", () => {
+      console.log("🟢 Connected:", newSocket.id);
     });
 
+    newSocket.on("disconnect", () => {
+      console.log("🔴 Disconnected");
+    });
+
+    setSocket(newSocket);
+
     return () => {
-      socket.off('connect');
-      socket.off('connect_error');
-      socket.off('disconnect');
+      newSocket.disconnect();
     };
   }, []);
 
