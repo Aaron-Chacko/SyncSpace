@@ -12,7 +12,6 @@ async function startServer() {
     await connectDB();
 
     const server = http.createServer(app);
-    initSocket(server);
 
     initializeSocket(server);
 
