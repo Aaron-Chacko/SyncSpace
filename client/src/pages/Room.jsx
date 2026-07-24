@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Canvas from "../components/Whiteboard/Canvas";
@@ -15,6 +15,8 @@ const Room = () => {
   const { roomId } = useParams();
   const socket = useSocketContext();
 
+  const [roomUsers, setRoomUsers] = useState([]);
+
   useEffect(() => {
     if (!socket || !roomId) return;
 
@@ -22,10 +24,18 @@ const Room = () => {
 
     socket.emit(SOCKET_EVENTS.JOIN_ROOM, roomId);
 
+    const handleRoomUsers = (users) => {
+      setRoomUsers(users);
+    };
+
+    socket.on(SOCKET_EVENTS.ROOM_USERS, handleRoomUsers);
+
     return () => {
+      socket.off(SOCKET_EVENTS.ROOM_USERS, handleRoomUsers);
       socket.emit(SOCKET_EVENTS.LEAVE_ROOM, roomId);
     };
   }, [socket, roomId]);
+
 
   return (
     <WhiteboardProvider>
@@ -40,7 +50,7 @@ const Room = () => {
           boxSizing: "border-box",
         }}
       >
-        <Sidebar />
+        <Sidebar roomUsers={roomUsers} />
 
         <div
           style={{
