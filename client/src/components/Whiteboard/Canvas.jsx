@@ -89,66 +89,55 @@ const Canvas = () => {
   }, [selectedId, elements]);
 
   // Socket event listeners
-  useEffect(() => {
-    if (!socket) return;
+useEffect(() => {
+  if (!socket) return;
 
-    const joinRoom = () => {
-      socket.emit('join-room', activeRoom);
-      console.log(`⚡ Joined room ${activeRoom} successfully via Socket.IO!`);
-    };
+  const handleDrawElement = (remoteEl) => {
+    setElementsRaw((prev) => [...prev, remoteEl]);
+  };
 
-    if (socket.connected) {
-      joinRoom();
-    } else {
-      socket.connect();
-    }
+  const handleUpdateElement = (updatedEl) => {
+    setElementsRaw((prev) =>
+      prev.map((el) => (el.id === updatedEl.id ? updatedEl : el))
+    );
+  };
 
-    socket.on('connect', joinRoom);
+  const handleClearCanvas = () => {
+    setElementsRaw([]);
+    setSelectedId(null);
+  };
 
-    const handleDrawElement = (remoteEl) => {
-      setElementsRaw((prev) => [...prev, remoteEl]);
-    };
+  const handleCursorMove = (data) => {
+    if (data.socketId === socket.id) return;
 
-    const handleUpdateElement = (updatedEl) => {
-      setElementsRaw((prev) => prev.map((el) => (el.id === updatedEl.id ? updatedEl : el)));
-    };
+    setRemoteCursors((prev) => ({
+      ...prev,
+      [data.socketId]: data,
+    }));
+  };
 
-    const handleClearCanvas = () => {
-      setElementsRaw([]);
-      setSelectedId(null);
-    };
+  const handleCursorLeave = (data) => {
+    setRemoteCursors((prev) => {
+      const next = { ...prev };
+      delete next[data.socketId];
+      return next;
+    });
+  };
 
-    const handleCursorMove = (data) => {
-      if (socket && data.socketId === socket.id) return;
-      setRemoteCursors((prev) => ({
-        ...prev,
-        [data.socketId]: data
-      }));
-    };
+  socket.on("draw-element", handleDrawElement);
+  socket.on("update-element", handleUpdateElement);
+  socket.on("clear-canvas", handleClearCanvas);
+  socket.on("cursor-move", handleCursorMove);
+  socket.on("cursor-leave", handleCursorLeave);
 
-    const handleCursorLeave = (data) => {
-      setRemoteCursors((prev) => {
-        const next = { ...prev };
-        delete next[data.socketId];
-        return next;
-      });
-    };
-
-    socket.on('draw-element', handleDrawElement);
-    socket.on('update-element', handleUpdateElement);
-    socket.on('clear-canvas', handleClearCanvas);
-    socket.on('cursor-move', handleCursorMove);
-    socket.on('cursor-leave', handleCursorLeave);
-
-    return () => {
-      socket.off('connect', joinRoom);
-      socket.off('draw-element', handleDrawElement);
-      socket.off('update-element', handleUpdateElement);
-      socket.off('clear-canvas', handleClearCanvas);
-      socket.off('cursor-move', handleCursorMove);
-      socket.off('cursor-leave', handleCursorLeave);
-    };
-  }, [socket, activeRoom, setElementsRaw, setSelectedId]);
+  return () => {
+    socket.off("draw-element", handleDrawElement);
+    socket.off("update-element", handleUpdateElement);
+    socket.off("clear-canvas", handleClearCanvas);
+    socket.off("cursor-move", handleCursorMove);
+    socket.off("cursor-leave", handleCursorLeave);
+  };
+}, [socket, setElementsRaw, setSelectedId]);
 
   // Resize observer
   useEffect(() => {
