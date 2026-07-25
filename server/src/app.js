@@ -1,19 +1,28 @@
-const express = require('express');
-const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
-const roomRoutes = require('./routes/roomRoutes');
-const sessionRoutes = require('./routes/sessionRoutes');
-const errorMiddleware = require('./middleware/errorMiddleware');
+import express from "express";
+import cors from "cors";
 
 const app = express();
 
+/* -------------------- Middlewares -------------------- */
+
+// Allow requests from the frontend
 app.use(cors());
+
+// Parse incoming JSON requests
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
-app.use('/api/rooms', roomRoutes);
-app.use('/api/sessions', sessionRoutes);
+// Parse URL-encoded form data
+app.use(express.urlencoded({ extended: true }));
 
-app.use(errorMiddleware);
+/* -------------------- Health Check Route -------------------- */
 
-module.exports = app;
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "🚀 SyncSpace Backend is running",
+  });
+});
+
+/* -------------------- Export App -------------------- */
+
+export default app;
