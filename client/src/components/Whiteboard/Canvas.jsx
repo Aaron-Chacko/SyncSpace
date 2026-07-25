@@ -143,10 +143,12 @@ useEffect(() => {
   useEffect(() => {
     if (containerRef.current) {
       const handleResize = () => {
-        setSize({
-          width: containerRef.current.offsetWidth,
-          height: containerRef.current.offsetHeight
-        });
+        if (containerRef.current) {
+          setSize({
+            width: containerRef.current.offsetWidth,
+            height: containerRef.current.offsetHeight
+          });
+        }
       };
 
       handleResize();
