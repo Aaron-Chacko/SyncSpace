@@ -3,4 +3,6 @@ export const SOCKET_EVENTS = {
   LEAVE_ROOM: "leave-room",
   USER_JOINED: "user-joined",
   USER_LEFT: "user-left",
+
+  ROOM_USERS: "room-users",
 };
