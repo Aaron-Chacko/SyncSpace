@@ -37,11 +37,81 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-title);
   color: var(--text-primary);
 }
 
 button {
   font-family: var(--font-sans);
+}
+
+/* ===========================
+   HOME PAGE
+=========================== */
+
+.page {
+  flex: 1;
+}
+
+.home-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+}
+
+.hero {
+  max-width: 800px;
+}
+
+.hero h1 {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  margin-bottom: 35px;
+  line-height: 1.6;
+}
+
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.btn {
+  padding: 12px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.primary {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+.primary:hover {
+  background: var(--accent-primary-hover);
+}
+
+.secondary {
+  border: 2px solid var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.secondary:hover {
+  background: var(--accent-primary);
+  color: #fff;
 }
