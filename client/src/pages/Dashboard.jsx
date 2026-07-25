@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CreateRoom from "../components/Dashboard/CreateRoom";
 import JoinRoom from "../components/Dashboard/JoinRoom";
 import RoomCard from "../components/Dashboard/RoomCard";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showJoinRoom, setShowJoinRoom] = useState(false);
 
@@ -31,6 +33,18 @@ const Dashboard = () => {
       description: "Whiteboard Practice",
     },
   ];
+
+  const handleCreateRoom = (roomName) => {
+    // Generate a random 6-character room code
+    const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    console.log(`Creating room: ${roomName} (${randomCode})`);
+    navigate(`/room/${randomCode}`);
+  };
+
+  const handleJoinRoom = (roomId) => {
+    console.log(`Joining room: ${roomId}`);
+    navigate(`/room/${roomId}`);
+  };
 
   return (
     <div className="dashboard-page">
@@ -67,9 +81,9 @@ const Dashboard = () => {
       </div>
 
       {/* Forms */}
-      {showCreateRoom && <CreateRoom />}
+      {showCreateRoom && <CreateRoom onCreate={handleCreateRoom} />}
 
-      {showJoinRoom && <JoinRoom />}
+      {showJoinRoom && <JoinRoom onJoin={handleJoinRoom} />}
 
       {/* Recent Rooms */}
       <section className="recent-rooms">
