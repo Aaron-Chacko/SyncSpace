@@ -1,13 +1,20 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
 
 const RoomCard = ({ room }) => {
-  const navigate = useNavigate();
   return (
-    <div className="room-card" onClick={() => navigate('/room/' + room.id)}>
+    <div className="room-card">
       <h3>{room.name}</h3>
-      <p>Created by: {room.creator}</p>
-      <p>Active users: {room.activeUsersCount}</p>
+
+      <p>{room.description}</p>
+
+      <div className="room-info">
+        <span>👤 {room.creator}</span>
+        <span>🟢 {room.activeUsersCount} Active</span>
+      </div>
+
+      <button className="primary-btn">
+        Open Room
+      </button>
     </div>
   );
 };
