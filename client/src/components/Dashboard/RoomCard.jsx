@@ -5,15 +5,17 @@ const RoomCard = ({ room }) => {
     <div className="room-card">
       <h3>{room.name}</h3>
 
-      <p>{room.description}</p>
+      <p>📅 Created: {room.createdDate}</p>
 
       <div className="room-info">
-        <span>👤 {room.creator}</span>
-        <span>🟢 {room.activeUsersCount} Active</span>
+        <span>👥 Members: {room.members}</span>
       </div>
 
-      <button className="primary-btn">
-        Open Room
+      <button
+        className="primary-btn"
+        onClick={() => alert(`Joining ${room.name}`)}
+      >
+        Join Room
       </button>
     </div>
   );
