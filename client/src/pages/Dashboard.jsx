@@ -12,29 +12,25 @@ const Dashboard = () => {
     {
       id: "room-1",
       name: "Frontend Team",
-      creator: "Aaron",
-      activeUsersCount: 3,
-      description: "React UI Development",
+      createdDate: "26 Jul 2026",
+      members: 3,
     },
     {
       id: "room-2",
       name: "Backend Team",
-      creator: "Rahul",
-      activeUsersCount: 2,
-      description: "Socket.io & APIs",
+      createdDate: "25 Jul 2026",
+      members: 2,
     },
     {
       id: "room-3",
       name: "Interview Room",
-      creator: "Admin",
-      activeUsersCount: 5,
-      description: "Whiteboard Practice",
+      createdDate: "24 Jul 2026",
+      members: 5,
     },
   ];
 
   return (
     <div className="dashboard-page">
-
       {/* Header */}
       <div className="dashboard-header">
         <div>
@@ -43,7 +39,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Buttons */}
+      {/* Action Buttons */}
       <div className="dashboard-actions">
         <button
           className="primary-btn"
@@ -75,13 +71,32 @@ const Dashboard = () => {
       <section className="recent-rooms">
         <h2>Recent Rooms</h2>
 
-        <div className="rooms-grid">
-          {recentRooms.map((room) => (
-            <RoomCard key={room.id} room={room} />
-          ))}
-        </div>
-      </section>
+        {recentRooms.length > 0 ? (
+          <div className="rooms-grid">
+            {recentRooms.map((room) => (
+              <RoomCard key={room.id} room={room} />
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <h3>No Rooms Found</h3>
 
+            <p>
+              You haven't created or joined any rooms yet.
+            </p>
+
+            <button
+              className="primary-btn"
+              onClick={() => {
+                setShowCreateRoom(true);
+                setShowJoinRoom(false);
+              }}
+            >
+              Create Your First Room
+            </button>
+          </div>
+        )}
+      </section>
     </div>
   );
 };

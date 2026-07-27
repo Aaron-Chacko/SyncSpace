@@ -12,14 +12,23 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="app-navbar" style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 30px', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}>
-      <Link to="/" style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 'bold', fontSize: '20px' }}>SyncSpace</Link>
-      <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+    <nav className="app-navbar">
+      <Link to="/" className="logo">
+        SyncSpace
+      </Link>
+
+      <div className="nav-links">
         {user ? (
           <>
             <span>Welcome, {user.name}</span>
             <Link to="/dashboard">Dashboard</Link>
-            <button onClick={handleLogout}>Log Out</button>
+
+            <button
+              className="secondary-btn"
+              onClick={handleLogout}
+            >
+              Log Out
+            </button>
           </>
         ) : (
           <>
