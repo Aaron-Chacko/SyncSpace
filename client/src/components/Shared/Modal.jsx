@@ -1,12 +1,61 @@
-import React from 'react';
+import { useEffect } from "react";
 
-const Modal = ({ isOpen, onClose, children }) => {
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  footer,
+}) => {
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
+
   return (
-    <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 100 }}>
-      <div className="modal-content" style={{ background: 'var(--bg-secondary)', padding: '30px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-        {children}
-        <button onClick={onClose} style={{ marginTop: '20px' }}>Close</button>
+    <div
+      className="modal-overlay"
+      onClick={onClose}
+    >
+      <div
+        className="modal-container"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-header">
+          <h2>{title}</h2>
+
+          <button
+            className="modal-close-btn"
+            onClick={onClose}
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="modal-body">
+          {children}
+        </div>
+
+        {footer && (
+          <div className="modal-footer">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
