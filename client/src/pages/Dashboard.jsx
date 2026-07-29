@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import CreateRoom from "../components/Dashboard/CreateRoom";
 import JoinRoom from "../components/Dashboard/JoinRoom";
 import RoomCard from "../components/Dashboard/RoomCard";
+import Modal from "../components/Shared/Modal";
 
 const Dashboard = () => {
   const [showCreateRoom, setShowCreateRoom] = useState(false);
@@ -44,7 +45,7 @@ const Dashboard = () => {
         <button
           className="primary-btn"
           onClick={() => {
-            setShowCreateRoom(!showCreateRoom);
+            setShowCreateRoom(true);
             setShowJoinRoom(false);
           }}
         >
@@ -54,7 +55,7 @@ const Dashboard = () => {
         <button
           className="secondary-btn"
           onClick={() => {
-            setShowJoinRoom(!showJoinRoom);
+            setShowJoinRoom(true);
             setShowCreateRoom(false);
           }}
         >
@@ -62,10 +63,23 @@ const Dashboard = () => {
         </button>
       </div>
 
-      {/* Forms */}
-      {showCreateRoom && <CreateRoom />}
+      {/* Create Room Modal */}
+      <Modal
+        isOpen={showCreateRoom}
+        onClose={() => setShowCreateRoom(false)}
+        title="Create Room"
+      >
+        <CreateRoom />
+      </Modal>
 
-      {showJoinRoom && <JoinRoom />}
+      {/* Join Room Modal */}
+      <Modal
+        isOpen={showJoinRoom}
+        onClose={() => setShowJoinRoom(false)}
+        title="Join Room"
+      >
+        <JoinRoom />
+      </Modal>
 
       {/* Recent Rooms */}
       <section className="recent-rooms">
@@ -81,9 +95,7 @@ const Dashboard = () => {
           <div className="empty-state">
             <h3>No Rooms Found</h3>
 
-            <p>
-              You haven't created or joined any rooms yet.
-            </p>
+            <p>You haven't created or joined any rooms yet.</p>
 
             <button
               className="primary-btn"
