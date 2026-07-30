@@ -3,6 +3,18 @@ export const SOCKET_EVENTS = {
   LEAVE_ROOM: "leave-room",
   USER_JOINED: "user-joined",
   USER_LEFT: "user-left",
-
   ROOM_USERS: "room-users",
+  REQUEST_EDIT_ACCESS: "request-edit-access",
+  EDIT_ACCESS_REQUESTED: "edit-access-requested",
+  GRANT_EDIT_ACCESS: "grant-edit-access",
+  ACCESS_UPDATED: "access-updated",
+
+  DRAW_ELEMENT: "draw-element",
+  UPDATE_ELEMENT: "update-element",
+  DRAW_LINE: "draw-line",
+  CLEAR_CANVAS: "clear-canvas",
+  CURSOR_MOVE: "cursor-move",
+  CURSOR_LEAVE: "cursor-leave",
+  EDITOR_UPDATE: "editor-update",
+  CODE_CHANGE: "code-change",
 };

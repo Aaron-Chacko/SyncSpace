@@ -1,13 +1,2 @@
-const { Server } = require('socket.io');
-
-const initSocket = (server) => {
-  const io = new Server(server, {
-    cors: {
-      origin: '*',
-      methods: ['GET', 'POST']
-    }
-  });
-  return io;
-};
-
-module.exports = initSocket;
+// Compatibility entry point; the canonical setup is in sockets/index.js.
+export { initializeSocket as default } from "../sockets/index.js";
