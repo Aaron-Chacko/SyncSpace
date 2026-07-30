@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import authService from "../services/auth";
 
 const AuthContext = createContext(null);
 const TOKEN_KEY = "syncspace.token";
@@ -19,7 +20,14 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
-  const logout = () => {
+  useEffect(() => {
+    authService.refresh().then(login).catch(() => {
+      // A missing or expired refresh cookie is normal for a new visitor.
+    });
+  }, []);
+
+  const logout = async () => {
+    try { await authService.logout(); } catch { /* Always clear local session. */ }
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     setToken(null);

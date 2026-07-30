@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../../services/auth';
 import { useAuth } from '../../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -34,6 +35,7 @@ const Login = () => {
       >
         Log In
       </button>
+      <Link to="/forgot-password">Forgot password?</Link>
     </form>
   );
 };

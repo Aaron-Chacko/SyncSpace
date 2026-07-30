@@ -5,5 +5,7 @@ const getSecret = () => {
   return process.env.JWT_SECRET;
 };
 
-export const createToken = (userId) => jwt.sign({ id: userId }, getSecret(), { expiresIn: "7d" });
+// Access tokens are deliberately short-lived. Persistent sessions use an opaque,
+// rotating refresh token stored in an HTTP-only cookie.
+export const createToken = (userId) => jwt.sign({ id: userId }, getSecret(), { expiresIn: "15m" });
 export const verifyToken = (token) => jwt.verify(token, getSecret());

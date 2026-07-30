@@ -3,13 +3,14 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import roomRoutes from "./routes/roomRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 const app = express();
 
 /* -------------------- Middlewares -------------------- */
 
 const allowedOrigins = process.env.CLIENT_ORIGIN?.split(",") ?? ["http://localhost:5173"];
-app.use(cors({ origin: allowedOrigins }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 // Parse incoming JSON requests
 app.use(express.json());
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/sessions", sessionRoutes);
+app.use("/api/admin", adminRoutes);
 
 /* -------------------- Health Check Route -------------------- */
 

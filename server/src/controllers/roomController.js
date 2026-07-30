@@ -51,8 +51,8 @@ export async function createRoom(req, res, next) {
 
 export async function getRoom(req, res, next) {
   try {
-    const room = await Room.findOne({ $and: [roomQuery(req.params.roomId), memberQuery(req.user.id)] });
-    if (!room) return res.status(404).json({ message: "Room not found or access denied." });
+    const room = await Room.findOne({ $and: [roomQuery(req.params.roomId), memberQuery(req.user.id), { isActive: true }] });
+    if (!room) return res.status(404).json({ message: "Room not found, inactive, or access denied." });
     return res.json({ room: roomResponse(room) });
   } catch (error) {
     return next(error);
