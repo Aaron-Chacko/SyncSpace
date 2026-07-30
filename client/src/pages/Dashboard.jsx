@@ -3,10 +3,15 @@ import CreateRoom from "../components/Dashboard/CreateRoom";
 import JoinRoom from "../components/Dashboard/JoinRoom";
 import RoomCard from "../components/Dashboard/RoomCard";
 import Modal from "../components/Shared/Modal";
+import DeleteRoom from "../components/Dashboard/DeleteRoom";
+import InviteUser from "../components/Dashboard/InviteUser";
 
 const Dashboard = () => {
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showJoinRoom, setShowJoinRoom] = useState(false);
+  const [showDeleteRoom, setShowDeleteRoom] = useState(false);
+  const [showInviteUser, setShowInviteUser] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
   // Dummy data (Backend integration baad me hogi)
   const recentRooms = [
@@ -81,6 +86,33 @@ const Dashboard = () => {
         <JoinRoom />
       </Modal>
 
+      {/* Invite User Modal */}
+      <Modal
+        isOpen={showInviteUser}
+        onClose={() => setShowInviteUser(false)}
+        title="Invite User"
+      >
+        {selectedRoom && (
+          <InviteUser
+            roomName={selectedRoom.name}
+            onClose={() => setShowInviteUser(false)}
+          />
+        )}
+      </Modal>
+
+      {/* Delete Room Modal */}
+      <Modal
+        isOpen={showDeleteRoom}
+        onClose={() => setShowDeleteRoom(false)}
+        title="Delete Room"
+      >
+        {selectedRoom && (
+          <DeleteRoom
+            roomName={selectedRoom.name}
+            onCancel={() => setShowDeleteRoom(false)}
+          />
+        )}
+      </Modal>
       {/* Recent Rooms */}
       <section className="recent-rooms">
         <h2>Recent Rooms</h2>
@@ -88,7 +120,18 @@ const Dashboard = () => {
         {recentRooms.length > 0 ? (
           <div className="rooms-grid">
             {recentRooms.map((room) => (
-              <RoomCard key={room.id} room={room} />
+              <RoomCard
+                key={room.id}
+                room={room}
+                onInvite={(room) => {
+                  setSelectedRoom(room);
+                  setShowInviteUser(true);
+                }}
+                onDelete={(room) => {
+                  setSelectedRoom(room);
+                  setShowDeleteRoom(true);
+                }}
+              />
             ))}
           </div>
         ) : (
