@@ -7,6 +7,7 @@ import * as awarenessProtocol from 'y-protocols/awareness';
 import { v4 as uuidv4 } from 'uuid';
 import LanguageSelector from './LanguageSelector';
 import './Editor.css';
+import socket from '../../services/socket';
 
 // ============================================
 // SUPPORTED LANGUAGES
@@ -213,6 +214,7 @@ const CodeEditor = ({
   userId,
   userName,
   userColor,
+  canEdit = false,
   isReplayMode = false,
   theme = 'vs-dark',
   onThemeChange = null,
@@ -231,7 +233,7 @@ const CodeEditor = ({
   const [wordWrap, setWordWrap] = useState('on');
   const [minimap, setMinimap] = useState(true);
   const [lineNumbers, setLineNumbers] = useState('on');
-  const [isReadOnly, setIsReadOnly] = useState(isReplayMode);
+  const isReadOnly = isReplayMode || !canEdit;
   const [saveStatus, setSaveStatus] = useState('💾 Saved');
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
@@ -248,6 +250,20 @@ const CodeEditor = ({
   const saveTimeoutRef = useRef(null);
   const yDocRef = useRef(null);
   const yAwarenessRef = useRef(null);
+  const applyingRemoteChangeRef = useRef(false);
+
+  useEffect(() => {
+    if (!roomId) return undefined;
+    const handleCodeChange = (data) => {
+      if (data.room !== roomId || typeof data.code !== 'string') return;
+      applyingRemoteChangeRef.current = true;
+      setCode(data.code);
+      if (data.language) setLanguage(data.language);
+      window.setTimeout(() => { applyingRemoteChangeRef.current = false; }, 0);
+    };
+    socket.on('code-change', handleCodeChange);
+    return () => socket.off('code-change', handleCodeChange);
+  }, [roomId]);
 
   // ============================================
   // GET USER COLOR
@@ -449,8 +465,11 @@ const CodeEditor = ({
   }, [onThemeChange]);
 
   const handleEditorChange = useCallback((value) => {
-    setCode(value || '');
-  }, []);
+    const nextCode = value || '';
+    setCode(nextCode);
+    if (!roomId || !canEdit || applyingRemoteChangeRef.current) return;
+    socket.emit('code-change', { room: roomId, code: nextCode, language });
+  }, [roomId, canEdit, language]);
 
   const handleFontSizeChange = useCallback((newSize) => {
     setFontSize(newSize);

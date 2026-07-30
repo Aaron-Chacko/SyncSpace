@@ -11,11 +11,13 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import Navbar from "./components/Shared/Navbar";
 
 import { AuthProvider } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext";
 
 function App() {
   return (
     <Router>
       <AuthProvider>
+        <SocketProvider>
         <div
           className="app-container"
           style={{
@@ -52,6 +54,7 @@ function App() {
             </Routes>
           </div>
         </div>
+        </SocketProvider>
       </AuthProvider>
     </Router>
   );
