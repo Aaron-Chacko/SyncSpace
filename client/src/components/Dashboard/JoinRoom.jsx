@@ -1,21 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-const JoinRoom = ({ onJoin }) => {
-  const [roomId, setRoomId] = useState('');
+const JoinRoom = () => {
+  const [roomCode, setRoomCode] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (roomId.trim()) {
-      onJoin(roomId);
-      setRoomId('');
-    }
+
+    // Backend integration baad me hogi
+    console.log({
+      roomCode,
+    });
+
+    alert("Join Room UI Ready (Backend not connected)");
+
+    setRoomCode("");
   };
 
   return (
-    <form className="join-room-form" onSubmit={handleSubmit}>
-      <input type="text" placeholder="Enter Room ID" value={roomId} onChange={e => setRoomId(e.target.value)} required />
-      <button type="submit">Join Room</button>
-    </form>
+    <div className="join-room-card">
+      <h2>Join Room</h2>
+
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Room Code</label>
+
+          <input
+            type="text"
+            placeholder="Enter Room Code"
+            value={roomCode}
+            onChange={(e) => setRoomCode(e.target.value)}
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="secondary-btn"
+        >
+          Join Room
+        </button>
+      </form>
+    </div>
   );
 };
 

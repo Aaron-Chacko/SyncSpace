@@ -1,13 +1,22 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
 
 const RoomCard = ({ room }) => {
-  const navigate = useNavigate();
   return (
-    <div className="room-card" onClick={() => navigate('/room/' + room.id)}>
+    <div className="room-card">
       <h3>{room.name}</h3>
-      <p>Created by: {room.creator}</p>
-      <p>Active users: {room.activeUsersCount}</p>
+
+      <p>📅 Created: {room.createdDate}</p>
+
+      <div className="room-info">
+        <span>👥 Members: {room.members}</span>
+      </div>
+
+      <button
+        className="primary-btn"
+        onClick={() => alert(`Joining ${room.name}`)}
+      >
+        Join Room
+      </button>
     </div>
   );
 };
