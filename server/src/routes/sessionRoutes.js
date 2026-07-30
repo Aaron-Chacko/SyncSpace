@@ -1,7 +1,8 @@
-import { Router } from "express";
-import authMiddleware from "../middleware/authMiddleware.js";
-import { getSession } from "../controllers/sessionController.js";
+const express = require('express');
+const router = express.Router();
+const sessionController = require('../controllers/sessionController');
+const authMiddleware = require('../middleware/authMiddleware');
 
-const router = Router();
-router.get("/:roomId", authMiddleware, getSession);
-export default router;
+router.get('/:roomId', authMiddleware, sessionController.getSession);
+
+module.exports = router;

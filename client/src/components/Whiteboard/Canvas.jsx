@@ -3,7 +3,6 @@ import { Stage, Layer, Line, Rect, Circle, Ellipse, Arrow, Text, Group, Path, Im
 import { useParams } from 'react-router-dom';
 import useWhiteboard from '../../hooks/useWhiteboard';
 import { useSocketContext } from '../../context/SocketContext';
-import { useAuth } from '../../context/AuthContext';
 import Toolbar from './Toolbar';
 import './Whiteboard.css';
 
@@ -35,13 +34,12 @@ const URLImage = ({ imageEl }) => {
   );
 };
 
-const Canvas = ({ canEdit = false }) => {
+const Canvas = () => {
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
   const transformerRef = useRef(null);
   const { roomId } = useParams();
   const socket = useSocketContext();
-  const { user } = useAuth();
 
   const [size, setSize] = useState({ width: 800, height: 600 });
   const [isDrawing, setIsDrawing] = useState(false);
@@ -176,7 +174,6 @@ useEffect(() => {
   }, [tool]);
 
   const handleImageFileChange = (e) => {
-    if (!canEdit) return;
     const file = e.target.files && e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -204,7 +201,7 @@ useEffect(() => {
   };
 
   const handleMouseDown = (e) => {
-    if (!canEdit || textInput || stickyInput || tool === 'pan') return;
+    if (textInput || stickyInput || tool === 'pan') return;
 
     const clickedOnEmpty = e.target === e.target.getStage();
     const stage = e.target.getStage();
@@ -326,7 +323,7 @@ useEffect(() => {
         room: activeRoom,
         x: pointGrid.x,
         y: pointGrid.y,
-        name: user?.name || 'Collaborator',
+        name: 'User ' + (socket.id ? socket.id.substring(0, 4) : ''),
         color: color
       });
     }
@@ -644,7 +641,7 @@ useEffect(() => {
         <Layer>
           {elements.map((el) => {
             const isSelected = selectedId === el.id;
-            const isDraggable = tool === 'select' && canEdit;
+            const isDraggable = tool === 'select';
 
             if (el.type === 'line') {
               return (
