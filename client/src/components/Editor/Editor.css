@@ -1,275 +1,679 @@
-/* src/components/Editor.css */
+/* Premium Minimalist Design System - SyncSpace Minimal Theme */
 
-.code-editor-container {
+:root {
+  --bg-darker: #09090b;       /* Zinc 950 */
+  --bg-editor: #18181b;       /* Zinc 900 */
+  --bg-hover: #27272a;        /* Zinc 800 */
+  --border-subtle: #27272a;   /* Zinc 800 */
+  --border-active: #3f3f46;   /* Zinc 700 */
+  --text-active: #f4f4f5;     /* Zinc 100 */
+  --text-muted: #a1a1aa;      /* Zinc 400 */
+  --text-disabled: #52525b;   /* Zinc 600 */
+  --accent-blue: #3b82f6;     /* Blue 500 */
+  --accent-violet: #6366f1;   /* Indigo 500 */
+  --accent-green: #10b981;    /* Emerald 500 */
+  --accent-red: #ef4444;      /* Red 500 */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Fira Code", "Consolas", Monaco, monospace;
+}
+
+.minimalist-style {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--bg-darker, #1a1a2e);
+  background: var(--bg-editor);
   position: relative;
   overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--text-active);
 }
 
 /* ============================================
-   TOOLBAR
+   TOP FILE TAB BAR (CODESPACES FLAT STYLE)
    ============================================ */
-.editor-toolbar {
+.vs-tab-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 12px;
-  background: var(--bg-dark, #16213e);
-  border-bottom: 1px solid var(--border, #2a2a4a);
-  flex-wrap: wrap;
-  gap: 4px;
-  min-height: 40px;
+  height: 38px;
+  background: var(--bg-darker);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  user-select: none;
+  overflow: hidden;
+  padding-right: 12px;
+}
+
+.vs-tabs-left,
+.vs-tabs-right {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Tab button - flat, rectangular, precise borders */
+.vs-tab {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 16px;
+  background: var(--bg-darker);
+  border-right: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.1s ease;
+  font-weight: 500;
+}
+
+.vs-tab:hover {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-active);
+}
+
+.vs-tab.active {
+  background: var(--bg-editor); /* Matches the main editor background */
+  color: var(--text-active);
+  border-top: 2px solid var(--accent-violet); /* Indigo highlight stripe */
+  height: 100%;
+}
+
+.vs-file-icon {
+  margin-right: 8px;
   flex-shrink: 0;
 }
 
-.toolbar-left,
-.toolbar-center,
-.toolbar-right {
+.vs-tab-title {
+  margin-right: 4px;
+}
+
+/* Muted language switcher select box */
+.vs-quick-lang {
+  position: relative;
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.vs-lang-select {
+  background: var(--bg-hover);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 11px;
+  padding: 2px 20px 2px 8px;
+  border-radius: 4px;
+  height: 22px;
+  cursor: pointer;
+  outline: none;
+  font-weight: 500;
+  appearance: none;
+  transition: all 0.15s ease;
+}
+
+.vs-lang-select:hover {
+  border-color: var(--border-active);
+  color: var(--text-active);
+}
+
+.vs-lang-select option {
+  background: var(--bg-darker);
+  color: var(--text-active);
+}
+
+.vs-dropdown-caret {
+  position: absolute;
+  right: 6px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* ============================================
+   MONOCHROMATIC BUTTON CONTROLS
+   ============================================ */
+.vs-actions-wrapper {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
 }
 
-.toolbar-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-secondary, #a8a8b8);
-  text-transform: uppercase;
-}
-
-.toolbar-select {
-  padding: 2px 8px;
-  background: var(--bg-light, #27272a);
-  border: 1px solid var(--border, #2a2a4a);
-  border-radius: 4px;
-  color: var(--text-primary, #e8e8e8);
-  font-size: 11px;
-  height: 26px;
-  cursor: pointer;
-  outline: none;
-  transition: border-color 0.2s ease;
-}
-
-.toolbar-select:hover {
-  border-color: var(--accent-color, #6C5CE7);
-}
-
-.toolbar-btn {
-  padding: 2px 8px;
-  background: transparent;
-  border: 1px solid var(--border, #2a2a4a);
-  border-radius: 4px;
-  color: var(--text-secondary, #a8a8b8);
-  cursor: pointer;
-  font-size: 11px;
-  height: 26px;
-  transition: all 0.2s ease;
+.vs-action-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
-}
-
-.toolbar-btn:hover {
-  background: var(--bg-hover, rgba(255,255,255,0.05));
-  color: var(--text-primary, #e8e8e8);
-  border-color: var(--border, #3a3a5a);
-}
-
-.toolbar-btn.active {
-  background: var(--accent-bg, rgba(108,92,231,0.1));
-  color: var(--accent-color, #6C5CE7);
-  border-color: var(--accent-color, #6C5CE7);
-}
-
-/* ============================================
-   SAVE BUTTON
-   ============================================ */
-.save-btn {
-  padding: 2px 12px;
-  background: #6C5CE7;
-  border: none;
-  border-radius: 4px;
-  color: #fff;
-  cursor: pointer;
+  gap: 6px;
+  padding: 0 12px;
   font-size: 12px;
   font-weight: 500;
-  height: 26px;
-  transition: all 0.2s ease;
-}
-
-.save-btn:hover:not(:disabled) {
-  background: #5A4BD1;
-  transform: scale(1.02);
-}
-
-.save-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* ============================================
-   SAVE STATUS
-   ============================================ */
-.save-status {
-  font-size: 11px;
-  padding: 2px 6px;
-  min-width: 60px;
-  text-align: center;
-}
-
-.save-status.saved {
-  color: #10b981;
-}
-
-.save-status.saving {
-  color: #f59e0b;
-}
-
-/* ============================================
-   LAST SAVED
-   ============================================ */
-.last-saved {
-  font-size: 10px;
-  color: var(--text-secondary, #a8a8b8);
-  padding: 2px 4px;
-}
-
-/* ============================================
-   COLLABORATIVE STATUS
-   ============================================ */
-.collaborative-status {
-  font-size: 10px;
-  color: #4ECDC4;
-  padding: 2px 6px;
-  background: rgba(78, 205, 196, 0.1);
   border-radius: 4px;
+  cursor: pointer;
+  height: 24px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-editor);
+  color: var(--text-active);
+  transition: all 0.15s ease;
+}
+
+.vs-action-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-active);
+}
+
+/* Accentuate active play icon minimally */
+.vs-action-btn.run-btn .vs-action-icon {
+  color: var(--accent-green);
+}
+
+.vs-action-btn.save-btn .vs-action-icon {
+  color: var(--accent-violet);
+}
+
+.vs-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Secondary square icon buttons */
+.vs-action-btn-icon {
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.status-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
+.vs-action-btn-icon:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-subtle);
+  color: var(--text-active);
+}
+
+.vs-action-btn-icon.active {
+  background: var(--bg-hover);
+  color: var(--accent-violet);
+  border-color: var(--border-subtle);
+}
+
+.vs-collaborator-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--accent-blue);
+  padding: 2px 8px;
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  border-radius: 4px;
+  margin-right: 4px;
+}
+
+.vs-pulse-indicator {
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #4ECDC4;
+  background-color: var(--accent-blue);
   animation: pulse 1.5s infinite;
 }
 
 /* ============================================
-   EDITOR WRAPPER
+   PREFERENCES CARD (MINIMAL DESIGN)
    ============================================ */
+.vs-settings-container {
+  position: relative;
+}
+
+.vs-settings-dropdown {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  width: 200px;
+  background: var(--bg-darker);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  z-index: 150;
+  animation: fadeIn 0.1s ease-out;
+}
+
+.vs-settings-header {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 8px;
+}
+
+.vs-settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.vs-settings-row span {
+  color: var(--text-muted);
+}
+
+.vs-settings-select {
+  padding: 1px 4px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-active);
+  font-size: 11px;
+  outline: none;
+}
+
+.vs-settings-toggle-btn {
+  padding: 1px 6px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vs-settings-toggle-btn.on {
+  color: var(--text-active);
+  background: var(--accent-violet);
+  border-color: var(--accent-violet);
+}
+
+/* ============================================
+   PANEL LAYOUT SPLITTING
+   ============================================ */
+.editor-workspace-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
 .editor-wrapper {
   flex: 1;
   position: relative;
   min-height: 0;
 }
 
-/* ============================================
-   REMOTE CURSORS
-   ============================================ */
-.remote-cursor {
-  transition: top 0.1s ease, left 0.1s ease;
+.editor-workspace-wrapper.console-split .editor-wrapper {
+  flex: 0 0 65%;
+}
+
+.editor-workspace-wrapper.console-maximized .editor-wrapper {
+  flex: 0 0 0%;
+  overflow: hidden;
+  display: none;
 }
 
 /* ============================================
-   CONNECTED USERS BADGE
+   FLAT DOCKED TERMINAL PANEL
    ============================================ */
+.vs-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-darker);
+  border-top: 1px solid var(--border-subtle);
+  min-height: 0;
+  z-index: 10;
+}
+
+.vs-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  background: var(--bg-darker);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.vs-panel-tabs {
+  display: flex;
+  gap: 16px;
+  height: 100%;
+}
+
+/* Clean text button tabs, matching VS Code panel */
+.vs-panel-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--text-muted);
+  padding: 0 2px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  height: 100%;
+}
+
+.vs-panel-tab:hover {
+  color: var(--text-active);
+}
+
+.vs-panel-tab.active {
+  color: var(--text-active);
+  border-bottom: 1px solid var(--text-active);
+}
+
+.vs-error-badge {
+  background: var(--accent-red);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 2px;
+  padding: 1px 4px;
+}
+
+.vs-panel-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vs-panel-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.vs-panel-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.vs-panel-btn:hover {
+  color: var(--text-active);
+  background: var(--bg-hover);
+}
+
+.vs-close-btn:hover {
+  color: var(--accent-red);
+  background: rgba(239, 44, 44, 0.05);
+}
+
+.vs-panel-content {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+  background: var(--bg-editor);
+}
+
+/* ============================================
+   OUTPUT & TERMINAL DATA VIEWS
+   ============================================ */
+.vs-terminal-body {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 14px 18px;
+  color: var(--text-active);
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.vs-terminal-body.scrollable {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.vs-terminal-pre {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.vs-terminal-empty {
+  color: var(--text-disabled);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.vs-terminal-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  height: 100%;
+}
+
+.vs-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.05);
+  border-top-color: var(--text-muted);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Problems Tab Layout */
+.vs-problem-line {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  color: var(--accent-red);
+}
+
+.vs-problem-icon {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.vs-problem-pre {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  white-space: pre-wrap;
+}
+
+/* ============================================
+   STDIN INPUT TEXTAREA
+   ============================================ */
+.vs-stdin-container {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.vs-stdin-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vs-stdin-textarea {
+  width: 100%;
+  flex: 1;
+  min-height: 80px;
+  background: var(--bg-darker);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-active);
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.1s ease;
+}
+
+.vs-stdin-textarea:focus {
+  border-color: var(--border-active);
+}
+
+.vs-preview-container {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+}
+
+.vs-preview-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #ffffff;
+}
+
+/* ============================================
+   FLAT PINNED STATUS BAR (DOCKED FOOTER)
+   ============================================ */
+.vs-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 24px;
+  background: var(--bg-darker);
+  border-top: 1px solid var(--border-subtle);
+  padding: 0 12px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  user-select: none;
+  z-index: 20;
+}
+
+.vs-status-left,
+.vs-status-right {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.vs-status-item {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vs-status-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-active);
+}
+
+.vs-status-icon {
+  margin-right: 4px;
+}
+
+.vs-spin-icon {
+  animation: spin 1.5s linear infinite;
+}
+
+/* Integrated Console toggle */
+.vs-status-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-family: inherit;
+  height: 100%;
+  padding: 0 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vs-status-tab-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-active);
+}
+
+.vs-status-tab-btn.active {
+  background: var(--bg-hover);
+  color: var(--accent-violet);
+}
+
+.vs-status-lang {
+  font-weight: 500;
+  color: var(--text-active);
+}
+
+/* User avatar badges */
 .connected-users-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 50px;
+  right: 16px;
   display: flex;
-  gap: 4px;
-  z-index: 50;
+  gap: 6px;
+  z-index: 20;
   flex-wrap: wrap;
   justify-content: flex-end;
-  max-width: 200px;
+  max-width: 250px;
 }
 
 .user-badge {
   padding: 2px 6px;
-  color: #fff;
+  color: #ffffff;
   border-radius: 4px;
-  font-size: 9px;
-  font-weight: 500;
-  opacity: 0.9;
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.95;
   white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* ============================================
-   ANIMATIONS
+   RESPONSIVE METRICS
    ============================================ */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   ANIMATIONS & KEYFRAMES
+   ============================================ */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
 }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
-@media (max-width: 768px) {
-  .editor-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-    padding: 4px 8px;
-  }
-  
-  .toolbar-left,
-  .toolbar-center,
-  .toolbar-right {
-    justify-content: center;
-  }
-  
-  .toolbar-select {
-    font-size: 10px;
-    padding: 2px 6px;
-  }
-  
-  .toolbar-btn {
-    font-size: 10px;
-    padding: 2px 6px;
-  }
-  
-  .save-btn {
-    font-size: 11px;
-    padding: 2px 10px;
-  }
-  
-  .last-saved {
-    font-size: 9px;
-  }
-}
-
-@media (max-width: 480px) {
-  .toolbar-left,
-  .toolbar-center,
-  .toolbar-right {
-    gap: 3px;
-  }
-  
-  .toolbar-select {
-    font-size: 9px;
-    padding: 1px 4px;
-    height: 22px;
-  }
-  
-  .toolbar-btn {
-    font-size: 9px;
-    padding: 1px 4px;
-    height: 22px;
-  }
-  
-  .save-btn {
-    font-size: 10px;
-    padding: 1px 8px;
-    height: 22px;
-  }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
