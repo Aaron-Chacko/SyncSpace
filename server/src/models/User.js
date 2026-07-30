@@ -21,22 +21,8 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: 8,
+      minlength: 6,
     },
-
-    role: { type: String, enum: ["user", "admin"], default: "user" },
-    emailVerified: { type: Boolean, default: false },
-    emailVerificationTokenHash: { type: String, select: false },
-    emailVerificationExpiresAt: { type: Date, select: false },
-    passwordResetTokenHash: { type: String, select: false },
-    passwordResetExpiresAt: { type: Date, select: false },
-    refreshTokens: {
-      type: [{ tokenHash: String, expiresAt: Date }],
-      default: [],
-      select: false,
-    },
-    failedLoginAttempts: { type: Number, default: 0, select: false },
-    lockUntil: { type: Date, select: false },
   },
   {
     timestamps: true,

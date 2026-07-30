@@ -1,11 +1,9 @@
-import { Router } from "express";
-import authMiddleware from "../middleware/authMiddleware.js";
-import { createRoom, getRoom, joinRoom, updateRoom } from "../controllers/roomController.js";
+const express = require('express');
+const router = express.Router();
+const roomController = require('../controllers/roomController');
+const authMiddleware = require('../middleware/authMiddleware');
 
-const router = Router();
-router.use(authMiddleware);
-router.post("/", createRoom);
-router.post("/:roomCode/join", joinRoom);
-router.get("/:roomId", getRoom);
-router.patch("/:roomId", updateRoom);
-export default router;
+router.post('/', authMiddleware, roomController.createRoom);
+router.get('/:roomId', authMiddleware, roomController.getRoom);
+
+module.exports = router;

@@ -1,40 +1,23 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import authService from "../services/auth";
+import React, { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
-const TOKEN_KEY = "syncspace.token";
-const USER_KEY = "syncspace.user";
-
-const storedUser = () => {
-  try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch { return null; }
-};
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(storedUser);
-  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
+  const [user, setUser] = useState(null);
 
-  const login = ({ user: userData, token: authToken }) => {
-    localStorage.setItem(TOKEN_KEY, authToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(userData));
-    setToken(authToken);
+  const login = (userData) => {
     setUser(userData);
   };
 
-  useEffect(() => {
-    authService.refresh().then(login).catch(() => {
-      // A missing or expired refresh cookie is normal for a new visitor.
-    });
-  }, []);
-
-  const logout = async () => {
-    try { await authService.logout(); } catch { /* Always clear local session. */ }
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    setToken(null);
+  const logout = () => {
     setUser(null);
   };
 
-  return <AuthContext.Provider value={{ user, token, isAuthenticated: Boolean(user && token), login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => useContext(AuthContext);

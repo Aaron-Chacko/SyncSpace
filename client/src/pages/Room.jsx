@@ -7,7 +7,6 @@ import Sidebar from "../components/Shared/Sidebar";
 
 import { WhiteboardProvider } from "../context/WhiteboardContext";
 import { useSocketContext } from "../context/SocketContext";
-import { useAuth } from "../context/AuthContext";
 import { SOCKET_EVENTS } from "../shared/socketEvents";
 
 import { Code2, Edit3 } from "lucide-react";
@@ -15,77 +14,27 @@ import { Code2, Edit3 } from "lucide-react";
 const Room = () => {
   const { roomId } = useParams();
   const socket = useSocketContext();
-  const { user } = useAuth();
 
   const [roomUsers, setRoomUsers] = useState([]);
-  const [access, setAccess] = useState({ isHost: false, canEdit: false });
-  const [accessRequests, setAccessRequests] = useState([]);
-  const [requestMessage, setRequestMessage] = useState("");
-  const [connectionError, setConnectionError] = useState("");
-  const [copied, setCopied] = useState(false);
-
-  const copyRoomCode = async () => {
-    await navigator.clipboard.writeText(roomId);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1500);
-  };
 
   useEffect(() => {
     if (!socket || !roomId) return;
 
     console.log(`Joining room: ${roomId}`);
 
-    const joinRoom = () => socket.emit(SOCKET_EVENTS.JOIN_ROOM, roomId, (result) => {
-      if (!result?.ok) {
-        setConnectionError(result?.error || "Unable to join this room.");
-        return;
-      }
-      setConnectionError("");
-      setRoomUsers(result.users);
-      setAccess({ isHost: result.isHost, canEdit: result.canEdit });
-    });
-    if (socket.connected) joinRoom();
-    socket.on("connect", joinRoom);
-    const handleConnectionError = (error) => {
-      setConnectionError(error.message || "Unable to connect to real-time collaboration.");
-    };
-    socket.on("connect_error", handleConnectionError);
+    socket.emit(SOCKET_EVENTS.JOIN_ROOM, roomId);
 
     const handleRoomUsers = (users) => {
       setRoomUsers(users);
     };
 
     socket.on(SOCKET_EVENTS.ROOM_USERS, handleRoomUsers);
-    const handleAccessUpdated = (update) => {
-      if (update.room === roomId) setAccess((current) => ({ ...current, canEdit: update.canEdit }));
-    };
-    const handleAccessRequest = (request) => {
-      if (request.room === roomId) setAccessRequests((requests) => [...requests.filter((item) => item.userId !== request.userId), request]);
-    };
-    socket.on(SOCKET_EVENTS.ACCESS_UPDATED, handleAccessUpdated);
-    socket.on(SOCKET_EVENTS.EDIT_ACCESS_REQUESTED, handleAccessRequest);
 
     return () => {
       socket.off(SOCKET_EVENTS.ROOM_USERS, handleRoomUsers);
-      socket.off(SOCKET_EVENTS.ACCESS_UPDATED, handleAccessUpdated);
-      socket.off(SOCKET_EVENTS.EDIT_ACCESS_REQUESTED, handleAccessRequest);
-      socket.off("connect", joinRoom);
-      socket.off("connect_error", handleConnectionError);
       socket.emit(SOCKET_EVENTS.LEAVE_ROOM, roomId);
     };
   }, [socket, roomId]);
-
-  const requestEditAccess = () => {
-    socket.emit(SOCKET_EVENTS.REQUEST_EDIT_ACCESS, { room: roomId }, (result) => {
-      setRequestMessage(result.ok ? "Request sent to the host." : result.error);
-    });
-  };
-
-  const setParticipantAccess = (userId, allow) => {
-    socket.emit(SOCKET_EVENTS.GRANT_EDIT_ACCESS, { room: roomId, userId, allow }, (result) => {
-      if (result.ok) setAccessRequests((requests) => requests.filter((request) => request.userId !== userId));
-    });
-  };
 
 
   return (
@@ -99,42 +48,9 @@ const Room = () => {
           background: "var(--bg-primary)",
           overflow: "hidden",
           boxSizing: "border-box",
-          position: "relative",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            top: "16px",
-            right: "20px",
-            zIndex: 2,
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "7px 10px",
-            border: "1px solid var(--border-color)",
-            borderRadius: "6px",
-            background: "var(--bg-tertiary)",
-            color: "var(--text-secondary)",
-            fontSize: "12px",
-          }}
-        >
-          <span>Room code: <strong style={{ color: "var(--text-primary)", letterSpacing: "0.08em" }}>{roomId}</strong></span>
-          <button type="button" className="secondary-btn" onClick={copyRoomCode} style={{ padding: "3px 7px", fontSize: "11px" }}>
-            {copied ? "Copied" : "Copy"}
-          </button>
-        </div>
-        <Sidebar
-          roomUsers={roomUsers}
-          isHost={access.isHost}
-          onGrantAccess={setParticipantAccess}
-          pendingRequests={accessRequests}
-        />
-        {connectionError && (
-          <div style={{ position: "absolute", top: "16px", left: "270px", zIndex: 3, padding: "8px 12px", borderRadius: "6px", background: "#3f1d24", color: "#fecaca", fontSize: "12px" }}>
-            {connectionError}
-          </div>
-        )}
+        <Sidebar roomUsers={roomUsers} />
 
         <div
           style={{
@@ -182,7 +98,7 @@ const Room = () => {
                 minHeight: 0,
               }}
             >
-              <Canvas canEdit={access.canEdit} />
+              <Canvas />
             </div>
           </div>
 
@@ -221,16 +137,10 @@ const Room = () => {
                 minHeight: 0,
               }}
             >
-              <CodeEditor roomId={roomId} userId={user?.id} userName={user?.name} canEdit={access.canEdit} />
+              <CodeEditor />
             </div>
           </div>
         </div>
-        {!access.isHost && !access.canEdit && (
-          <div style={{ position: "absolute", bottom: "16px", right: "20px", zIndex: 3, padding: "10px", borderRadius: "6px", background: "var(--bg-tertiary)", border: "1px solid var(--border-color)" }}>
-            <button type="button" className="primary-btn" onClick={requestEditAccess}>Request edit access</button>
-            {requestMessage && <span style={{ marginLeft: "8px", fontSize: "12px" }}>{requestMessage}</span>}
-          </div>
-        )}
       </div>
     </WhiteboardProvider>
   );
