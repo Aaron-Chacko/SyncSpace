@@ -3,8 +3,7 @@ import { useParams } from "react-router-dom";
 
 import Canvas from "../components/Whiteboard/Canvas";
 import CodeEditor from "../components/Editor/CodeEditor";
-import Sidebar from "../components/Shared/Sidebar";
-
+import ParticipantsSidebar from "../components/Shared/ParticipantsSidebar";
 import { WhiteboardProvider } from "../context/WhiteboardContext";
 import { useSocketContext } from "../context/SocketContext";
 import { SOCKET_EVENTS } from "../shared/socketEvents";
@@ -50,7 +49,7 @@ const Room = () => {
           boxSizing: "border-box",
         }}
       >
-        <Sidebar roomUsers={roomUsers} />
+        <ParticipantsSidebar roomUsers={roomUsers} />
 
         <div
           style={{

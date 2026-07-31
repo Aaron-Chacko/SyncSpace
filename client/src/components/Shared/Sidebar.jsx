@@ -1,29 +1,41 @@
 import React from "react";
+import {
+    LayoutDashboard,
+    FolderOpen,
+    History,
+    LogOut,
+} from "lucide-react";
 
-const Sidebar = ({ roomUsers }) => {
-  return (
-    <aside
-      className="app-sidebar"
-      style={{
-        width: "250px",
-        background: "var(--bg-secondary)",
-        padding: "20px",
-        borderRight: "1px solid var(--border-color)",
-      }}
-    >
-      <h3>Participants</h3>
+const Sidebar = () => {
+    return (
+        <aside className="dashboard-sidebar">
+            <div className="sidebar-logo">
+                <h2>SyncSpace</h2>
+            </div>
 
-      <p>{roomUsers.length} user(s) connected</p>
+            <nav className="sidebar-menu">
+                <button className="sidebar-item active">
+                    <LayoutDashboard size={18} />
+                    <span>Dashboard</span>
+                </button>
 
-      <ul style={{ paddingLeft: "20px" }}>
-        {roomUsers.map((user) => (
-          <li key={user.socketId}>
-            {user.socketId}
-          </li>
-        ))}
-      </ul>
-    </aside>
-  );
+                <button className="sidebar-item">
+                    <FolderOpen size={18} />
+                    <span>Rooms</span>
+                </button>
+
+                <button className="sidebar-item">
+                    <History size={18} />
+                    <span>Replay</span>
+                </button>
+            </nav>
+
+            <button className="sidebar-item logout-btn">
+                <LogOut size={18} />
+                <span>Logout</span>
+            </button>
+        </aside>
+    );
 };
 
 export default Sidebar;
