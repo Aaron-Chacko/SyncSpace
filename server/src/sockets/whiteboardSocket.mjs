@@ -1,54 +1,39 @@
-export default (io, socket) => {
-  // Sync shape/line drawings
-  socket.on('draw-element', (data) => {
-    if (data && data.room) {
-      socket.to(data.room).emit('draw-element', data.element);
-    }
+import { SOCKET_EVENTS } from "../shared/socketEvents.js";
+
+const isFiniteNumber = (value) => typeof value === "number" && Number.isFinite(value);
+
+export default function whiteboardSocketHandler(io, socket, getJoinedRoom, canEdit) {
+  const relayElement = (eventName) => {
+    socket.on(eventName, (data = {}) => {
+      const roomCode = getJoinedRoom(data.room);
+      if (!roomCode || !canEdit(roomCode) || !data.element || typeof data.element !== "object") return;
+      socket.to(roomCode).emit(eventName, data.element);
+    });
+  };
+
+  relayElement(SOCKET_EVENTS.DRAW_ELEMENT);
+  relayElement(SOCKET_EVENTS.UPDATE_ELEMENT);
+
+  socket.on(SOCKET_EVENTS.DRAW_LINE, (data = {}) => {
+    const roomCode = getJoinedRoom(data.room);
+    if (roomCode && canEdit(roomCode)) socket.to(roomCode).emit(SOCKET_EVENTS.DRAW_LINE, data);
   });
 
-  socket.on('update-element', (data) => {
-    if (data && data.room) {
-      socket.to(data.room).emit('update-element', data.element);
-    }
+  socket.on(SOCKET_EVENTS.CLEAR_CANVAS, (data = {}) => {
+    const roomCode = getJoinedRoom(data.room);
+    if (roomCode && canEdit(roomCode)) socket.to(roomCode).emit(SOCKET_EVENTS.CLEAR_CANVAS);
   });
 
-  socket.on('draw-line', (data) => {
-    if (data && data.room) {
-      socket.to(data.room).emit('draw-line', data);
-    }
-  });
+  socket.on(SOCKET_EVENTS.CURSOR_MOVE, (data = {}) => {
+    const roomCode = getJoinedRoom(data.room);
+    if (!roomCode || !isFiniteNumber(data.x) || !isFiniteNumber(data.y)) return;
 
-  // Sync canvas clear
-  socket.on('clear-canvas', (data) => {
-    if (data && data.room) {
-      socket.to(data.room).emit('clear-canvas');
-    }
-  });
-
-  // Sync code editor changes
-  socket.on('code-change', (data) => {
-    if (data && data.room) {
-      socket.to(data.room).emit('code-change', data);
-    }
-  });
-
-  // Sync multiplayer mouse cursor positions
-  socket.on('cursor-move', (data) => {
-    if (data && data.room) {
-      socket.to(data.room).emit('cursor-move', {
-        socketId: socket.id,
-        x: data.x,
-        y: data.y,
-        name: data.name || 'Collaborator',
-        color: data.color || '#06b6d4'
-      });
-    }
-  });
-
-  // Notify room on disconnect to clear user cursor
-  socket.on('disconnecting', () => {
-    socket.rooms.forEach((room) => {
-      socket.to(room).emit('cursor-leave', { socketId: socket.id });
+    socket.to(roomCode).emit(SOCKET_EVENTS.CURSOR_MOVE, {
+      socketId: socket.id,
+      x: data.x,
+      y: data.y,
+      name: socket.user?.name || "Collaborator",
+      color: typeof data.color === "string" ? data.color.slice(0, 32) : "#06b6d4",
     });
   });
-};
+}
