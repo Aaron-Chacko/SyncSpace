@@ -12,6 +12,7 @@ import Navbar from "./components/Shared/Navbar";
 
 import { AuthProvider } from "./context/AuthContext";
 import Replay from "./pages/Replay";
+import Loading from "./pages/Loading";
 
 function App() {
   return (
@@ -33,6 +34,8 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/replay" element={<Replay />} />
+              <Route path="/loading" element={<Loading />} />
+
               <Route
                 path="/dashboard"
                 element={

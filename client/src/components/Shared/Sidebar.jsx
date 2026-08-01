@@ -5,7 +5,9 @@ import {
     FolderOpen,
     History,
     LogOut,
+    Loader2,
 } from "lucide-react";
+
 
 const Sidebar = () => {
     const navigate = useNavigate();
@@ -48,6 +50,15 @@ const Sidebar = () => {
                 </button>
             </nav>
 
+            <button
+                className={`sidebar-item ${location.pathname === "/loading" ? "active" : ""
+                    }`}
+                onClick={() => navigate("/loading")}
+            >
+                <Loader2 size={18} />
+                <span>Loading</span>
+            </button>
+
             {/* Logout */}
             <button
                 className="sidebar-item logout-btn"
@@ -56,6 +67,7 @@ const Sidebar = () => {
                 <LogOut size={18} />
                 <span>Logout</span>
             </button>
+
         </aside>
     );
 };

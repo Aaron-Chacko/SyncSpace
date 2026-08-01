@@ -905,3 +905,61 @@ button {
     width: 100%;
   }
 }
+
+/* ===========================
+   Loader
+=========================== */
+
+.loader {
+  border: 3px solid rgba(255, 255, 255, .2);
+  border-top: 3px solid #6366f1;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===========================
+   Skeleton
+=========================== */
+
+.skeleton {
+  background: linear-gradient(90deg,
+      #2f3545 25%,
+      #424a60 50%,
+      #2f3545 75%);
+
+  background-size: 200% 100%;
+
+  border-radius: 8px;
+
+  animation: skeleton-loading 1.2s infinite;
+}
+
+@keyframes skeleton-loading {
+
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+
+}
+
+/* ===========================
+Loading Button
+=========================== */
+
+button:disabled {
+
+  opacity: .7;
+
+  cursor: not-allowed;
+
+}
