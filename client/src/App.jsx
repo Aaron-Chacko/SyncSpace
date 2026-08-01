@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import Navbar from "./components/Shared/Navbar";
 
 import { AuthProvider } from "./context/AuthContext";
+import Replay from "./pages/Replay";
 
 function App() {
   return (
@@ -31,7 +32,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-
+              <Route path="/replay" element={<Replay />} />
               <Route
                 path="/dashboard"
                 element={

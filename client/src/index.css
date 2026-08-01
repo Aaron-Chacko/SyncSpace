@@ -844,3 +844,64 @@ button {
 
 }
 
+/* ===========================
+   Replay Panel
+=========================== */
+
+.replay-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 30px;
+}
+
+.replay-panel h2 {
+  margin-bottom: 30px;
+}
+
+.timeline-section {
+  margin-bottom: 35px;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  color: var(--text-secondary);
+}
+
+.timeline-slider {
+  width: 100%;
+  cursor: pointer;
+}
+
+.timeline-time {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  color: var(--text-secondary);
+}
+
+.replay-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.replay-controls button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .replay-controls {
+    flex-direction: column;
+  }
+
+  .replay-controls button {
+    width: 100%;
+  }
+}

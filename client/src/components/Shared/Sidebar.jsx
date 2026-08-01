@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
     LayoutDashboard,
     FolderOpen,
@@ -7,6 +8,9 @@ import {
 } from "lucide-react";
 
 const Sidebar = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
     return (
         <aside className="dashboard-sidebar">
             <div className="sidebar-logo">
@@ -14,23 +18,41 @@ const Sidebar = () => {
             </div>
 
             <nav className="sidebar-menu">
-                <button className="sidebar-item active">
+                {/* Dashboard */}
+                <button
+                    className={`sidebar-item ${location.pathname === "/dashboard" ? "active" : ""
+                        }`}
+                    onClick={() => navigate("/dashboard")}
+                >
                     <LayoutDashboard size={18} />
                     <span>Dashboard</span>
                 </button>
 
-                <button className="sidebar-item">
+                {/* Rooms */}
+                <button
+                    className="sidebar-item"
+                    onClick={() => navigate("/dashboard")}
+                >
                     <FolderOpen size={18} />
                     <span>Rooms</span>
                 </button>
 
-                <button className="sidebar-item">
+                {/* Replay */}
+                <button
+                    className={`sidebar-item ${location.pathname === "/replay" ? "active" : ""
+                        }`}
+                    onClick={() => navigate("/replay")}
+                >
                     <History size={18} />
                     <span>Replay</span>
                 </button>
             </nav>
 
-            <button className="sidebar-item logout-btn">
+            {/* Logout */}
+            <button
+                className="sidebar-item logout-btn"
+                onClick={() => navigate("/")}
+            >
                 <LogOut size={18} />
                 <span>Logout</span>
             </button>
