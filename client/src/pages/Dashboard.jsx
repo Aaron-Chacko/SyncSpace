@@ -6,6 +6,8 @@ import Modal from "../components/Shared/Modal";
 import DeleteRoom from "../components/Dashboard/DeleteRoom";
 import InviteUser from "../components/Dashboard/InviteUser";
 import Sidebar from "../components/Shared/Sidebar";
+import DashboardBanner from "../components/Dashboard/DashboardBanner";
+import DashboardStats from "../components/Dashboard/DashboardStats";
 
 const Dashboard = () => {
   const [showCreateRoom, setShowCreateRoom] = useState(false);
@@ -39,15 +41,20 @@ const Dashboard = () => {
   return (
     <div className="dashboard-layout">
       <Sidebar />
-
       <div className="dashboard-page">
-        {/* Header */}
-        <div className="dashboard-header">
-          <div>
-            <h1>Welcome 👋</h1>
-            <p>Manage your collaborative workspaces</p>
-          </div>
-        </div>
+
+        <DashboardBanner />
+
+        <DashboardStats
+          totalRooms={recentRooms.length}
+          totalMembers={recentRooms.reduce(
+            (sum, room) => sum + room.members,
+            0
+          )}
+          activeRooms={recentRooms.length}
+          filesShared={0}
+        />
+
 
         {/* Action Buttons */}
         <div className="dashboard-actions">
@@ -157,7 +164,7 @@ const Dashboard = () => {
           )}
         </section>
       </div>
-  </div>
+    </div>
   );
 };
 
