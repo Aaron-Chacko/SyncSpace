@@ -34,14 +34,19 @@ const Modal = ({
     >
       <div
         className="modal-container"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
-          <h2>{title}</h2>
+          <h2 id="modal-title">{title}</h2>
 
           <button
             className="modal-close-btn"
             onClick={onClose}
+            aria-label="Close modal"
+            title="Close"
           >
             ✕
           </button>

@@ -1,6 +1,21 @@
 import React from "react";
+//import { useNavigate, useLocation } from "react-router-dom";
+/*import {
+    LayoutDashboard,
+    FolderOpen,
+    History,
+    LogOut,
+    Loader2,
+    WifiOff,
+    ShieldX,
+} from "lucide-react"; */
 
-const Sidebar = ({ roomUsers, isHost, onGrantAccess, pendingRequests = [] }) => {
+const Sidebar = ({
+  roomUsers = [],
+  isHost = false,
+  onGrantAccess = () => {},
+  pendingRequests = [],
+}) => {
   return (
     <aside
       className="app-sidebar"

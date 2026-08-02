@@ -3,8 +3,7 @@ import { useParams } from "react-router-dom";
 
 import Canvas from "../components/Whiteboard/Canvas";
 import CodeEditor from "../components/Editor/CodeEditor";
-import Sidebar from "../components/Shared/Sidebar";
-
+import ParticipantsSidebar from "../components/Shared/ParticipantsSidebar";
 import { WhiteboardProvider } from "../context/WhiteboardContext";
 import { useSocketContext } from "../context/SocketContext";
 import { useAuth } from "../context/AuthContext";
@@ -102,39 +101,64 @@ const Room = () => {
           position: "relative",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            top: "16px",
-            right: "20px",
-            zIndex: 2,
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "7px 10px",
-            border: "1px solid var(--border-color)",
-            borderRadius: "6px",
-            background: "var(--bg-tertiary)",
-            color: "var(--text-secondary)",
-            fontSize: "12px",
-          }}
-        >
-          <span>Room code: <strong style={{ color: "var(--text-primary)", letterSpacing: "0.08em" }}>{roomId}</strong></span>
-          <button type="button" className="secondary-btn" onClick={copyRoomCode} style={{ padding: "3px 7px", fontSize: "11px" }}>
-            {copied ? "Copied" : "Copy"}
-          </button>
-        </div>
-        <Sidebar
-          roomUsers={roomUsers}
-          isHost={access.isHost}
-          onGrantAccess={setParticipantAccess}
-          pendingRequests={accessRequests}
-        />
-        {connectionError && (
-          <div style={{ position: "absolute", top: "16px", left: "270px", zIndex: 3, padding: "8px 12px", borderRadius: "6px", background: "#3f1d24", color: "#fecaca", fontSize: "12px" }}>
-            {connectionError}
-          </div>
-        )}
+       <div
+  style={{
+    position: "absolute",
+    top: "16px",
+    right: "20px",
+    zIndex: 2,
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "7px 10px",
+    border: "1px solid var(--border-color)",
+    borderRadius: "6px",
+    background: "var(--bg-tertiary)",
+    color: "var(--text-secondary)",
+    fontSize: "12px",
+  }}
+>
+  <span>
+    Room code:{" "}
+    <strong style={{ color: "var(--text-primary)", letterSpacing: "0.08em" }}>
+      {roomId}
+    </strong>
+  </span>
+
+  <button
+    type="button"
+    className="secondary-btn"
+    onClick={copyRoomCode}
+    style={{ padding: "3px 7px", fontSize: "11px" }}
+  >
+    {copied ? "Copied" : "Copy"}
+  </button>
+</div>
+
+<ParticipantsSidebar
+  roomUsers={roomUsers}
+  isHost={access.isHost}
+  onGrantAccess={setParticipantAccess}
+  pendingRequests={accessRequests}
+/>
+
+{connectionError && (
+  <div
+    style={{
+      position: "absolute",
+      top: "16px",
+      left: "270px",
+      zIndex: 3,
+      padding: "8px 12px",
+      borderRadius: "6px",
+      background: "#3f1d24",
+      color: "#fecaca",
+      fontSize: "12px",
+    }}
+  >
+    {connectionError}
+  </div>
+)}
 
         <div
           style={{

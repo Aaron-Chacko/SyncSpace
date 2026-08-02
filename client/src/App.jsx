@@ -14,6 +14,11 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import Navbar from "./components/Shared/Navbar";
 
 import { AuthProvider } from "./context/AuthContext";
+import Replay from "./pages/Replay";
+import Loading from "./pages/Loading";
+import NotFound from "./pages/NotFound";
+import NetworkError from "./pages/NetworkError";
+import AccessDenied from "./pages/AccessDenied";
 import { SocketProvider } from "./context/SocketContext";
 
 function App() {
@@ -36,6 +41,10 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/replay" element={<Replay />} />
+              <Route path="/loading" element={<Loading />} />
+              <Route path="/network-error" element={<NetworkError />} />
+              <Route path="/access-denied" element={<AccessDenied />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
@@ -57,6 +66,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
         </div>

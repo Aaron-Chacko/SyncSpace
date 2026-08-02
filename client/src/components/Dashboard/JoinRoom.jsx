@@ -18,11 +18,37 @@ const JoinRoom = () => {
     }
   };
 
-  return <div className="join-room-card"><h2>Join Room</h2><form onSubmit={handleSubmit}>
-    {error && <p role="alert">{error}</p>}
-    <div className="form-group"><label>Room Code</label><input type="text" placeholder="Enter Room Code" value={roomCode} onChange={(event) => setRoomCode(event.target.value)} required /></div>
-    <button type="submit" className="secondary-btn">Join Room</button>
-  </form></div>;
+ return (
+  <div className="join-room-card">
+    <h2>Join Room</h2>
+
+    <form onSubmit={handleSubmit}>
+      {error && <p role="alert">{error}</p>}
+
+      <div className="form-group">
+        <label htmlFor="roomCode">Room Code</label>
+
+        <input
+          id="roomCode"
+          type="text"
+          placeholder="Enter Room Code"
+          aria-label="Room Code"
+          value={roomCode}
+          onChange={(e) => setRoomCode(e.target.value)}
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="secondary-btn"
+        aria-label="Join Room"
+      >
+        Join Room
+      </button>
+    </form>
+  </div>
+);
 };
 
 export default JoinRoom;
