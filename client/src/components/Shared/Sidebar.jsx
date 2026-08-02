@@ -1,6 +1,6 @@
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import {
+//import { useNavigate, useLocation } from "react-router-dom";
+/*import {
     LayoutDashboard,
     FolderOpen,
     History,
@@ -8,103 +8,43 @@ import {
     Loader2,
     WifiOff,
     ShieldX,
-} from "lucide-react";
+} from "lucide-react"; */
 
-const Sidebar = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
+const Sidebar = ({
+  roomUsers = [],
+  isHost = false,
+  onGrantAccess = () => {},
+  pendingRequests = [],
+}) => {
+  return (
+    <aside
+      className="app-sidebar"
+      style={{
+        width: "250px",
+        background: "var(--bg-secondary)",
+        padding: "20px",
+        borderRight: "1px solid var(--border-color)",
+      }}
+    >
+      <h3>Participants</h3>
 
-    return (
-        <aside className="dashboard-sidebar">
-            <div className="sidebar-logo">
-                <h2>SyncSpace</h2>
-            </div>
+      <p>{roomUsers.length} user(s) connected</p>
 
-            <nav className="sidebar-menu">
-                {/* Dashboard */}
-                <button
-                    className={`sidebar-item ${location.pathname === "/dashboard" ? "active" : ""
-                        }`}
-                    onClick={() => navigate("/dashboard")}
-                    aria-label="Dashboard"
-                    title="Dashboard"
-                >
-                    <LayoutDashboard size={18} />
-                    <span>Dashboard</span>
-                </button>
-
-                {/* Rooms */}
-                <button
-                    className="sidebar-item"
-                    onClick={() => navigate("/dashboard")}
-                    aria-label="Rooms"
-                    title="Rooms"
-                >
-                    <FolderOpen size={18} />
-                    <span>Rooms</span>
-                </button>
-
-                {/* Replay */}
-                <button
-                    className={`sidebar-item ${location.pathname === "/replay" ? "active" : ""
-                        }`}
-                    onClick={() => navigate("/replay")}
-                    aria-label="Replay"
-                    title="Replay"
-                >
-                    <History size={18} />
-                    <span>Replay</span>
-                </button>
-
-                {/* Network Error */}
-                <button
-                    className={`sidebar-item ${location.pathname === "/network-error" ? "active" : ""
-                        }`}
-                    onClick={() => navigate("/network-error")}
-                    aria-label="Network Error"
-                    title="Network Error"
-                >
-                    <WifiOff size={18} />
-                    <span>Network Error</span>
-                </button>
-
-                {/* Loading */}
-                <button
-                    className={`sidebar-item ${location.pathname === "/loading" ? "active" : ""
-                        }`}
-                    onClick={() => navigate("/loading")}
-                    aria-label="Loading"
-                    title="Loading"
-                >
-                    <Loader2 size={18} />
-                    <span>Loading</span>
-                </button>
-
-                {/* Access Denied */}
-                <button
-                    className={`sidebar-item ${location.pathname === "/access-denied" ? "active" : ""
-                        }`}
-                    onClick={() => navigate("/access-denied")}
-                    aria-label="Access Denied"
-                    title="Access Denied"
-                >
-                    <ShieldX size={18} />
-                    <span>Access Denied</span>
-                </button>
-            </nav>
-
-            {/* Logout */}
-            <button
-                className="sidebar-item logout-btn"
-                onClick={() => navigate("/")}
-                aria-label="Logout"
-                title="Logout"
-            >
-                <LogOut size={18} />
-                <span>Logout</span>
-            </button>
-        </aside>
-    );
+      <ul style={{ paddingLeft: "20px" }}>
+        {roomUsers.map((user) => (
+          <li key={user.socketId} style={{ marginBottom: "10px" }}>
+            <strong>{user.name || user.socketId}</strong>{user.isHost ? " (Host)" : user.canEdit ? " (Editor)" : " (Viewer)"}
+            {isHost && !user.isHost && (
+              <button type="button" className="secondary-btn" style={{ marginLeft: "6px", padding: "2px 6px", fontSize: "11px" }} onClick={() => onGrantAccess(user.userId, !user.canEdit)}>
+                {user.canEdit ? "Remove edit" : "Grant edit"}
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+      {isHost && pendingRequests.length > 0 && <div><h4>Edit requests</h4>{pendingRequests.map((request) => <div key={request.userId}><span>{request.name}</span><button type="button" className="primary-btn" style={{ marginLeft: "6px", padding: "2px 6px", fontSize: "11px" }} onClick={() => onGrantAccess(request.userId, true)}>Approve</button></div>)}</div>}
+    </aside>
+  );
 };
 
 export default Sidebar;

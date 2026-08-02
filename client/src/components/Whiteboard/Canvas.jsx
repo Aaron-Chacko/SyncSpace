@@ -3,6 +3,7 @@ import { Stage, Layer, Line, Rect, Circle, Ellipse, Arrow, Text, Group, Path, Im
 import { useParams } from 'react-router-dom';
 import useWhiteboard from '../../hooks/useWhiteboard';
 import { useSocketContext } from '../../context/SocketContext';
+import { useAuth } from '../../context/AuthContext';
 import Toolbar from './Toolbar';
 import './Whiteboard.css';
 
@@ -34,12 +35,13 @@ const URLImage = ({ imageEl }) => {
   );
 };
 
-const Canvas = () => {
+const Canvas = ({ canEdit = false }) => {
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
   const transformerRef = useRef(null);
   const { roomId } = useParams();
   const socket = useSocketContext();
+  const { user } = useAuth();
 
   const [size, setSize] = useState({ width: 800, height: 600 });
   const [isDrawing, setIsDrawing] = useState(false);
@@ -143,10 +145,12 @@ useEffect(() => {
   useEffect(() => {
     if (containerRef.current) {
       const handleResize = () => {
-        setSize({
-          width: containerRef.current.offsetWidth,
-          height: containerRef.current.offsetHeight
-        });
+        if (containerRef.current) {
+          setSize({
+            width: containerRef.current.offsetWidth,
+            height: containerRef.current.offsetHeight
+          });
+        }
       };
 
       handleResize();
@@ -174,6 +178,7 @@ useEffect(() => {
   }, [tool]);
 
   const handleImageFileChange = (e) => {
+    if (!canEdit) return;
     const file = e.target.files && e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -201,7 +206,7 @@ useEffect(() => {
   };
 
   const handleMouseDown = (e) => {
-    if (textInput || stickyInput || tool === 'pan') return;
+    if (!canEdit || textInput || stickyInput || tool === 'pan') return;
 
     const clickedOnEmpty = e.target === e.target.getStage();
     const stage = e.target.getStage();
@@ -323,7 +328,7 @@ useEffect(() => {
         room: activeRoom,
         x: pointGrid.x,
         y: pointGrid.y,
-        name: 'User ' + (socket.id ? socket.id.substring(0, 4) : ''),
+        name: user?.name || 'Collaborator',
         color: color
       });
     }
@@ -641,7 +646,7 @@ useEffect(() => {
         <Layer>
           {elements.map((el) => {
             const isSelected = selectedId === el.id;
-            const isDraggable = tool === 'select';
+            const isDraggable = tool === 'select' && canEdit;
 
             if (el.type === 'line') {
               return (

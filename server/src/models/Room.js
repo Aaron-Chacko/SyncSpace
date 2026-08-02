@@ -22,10 +22,27 @@ const roomSchema = new mongoose.Schema(
       maxlength: [50, "Room name cannot exceed 50 characters"],
     },
 
+    description: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Description cannot exceed 500 characters"],
+      default: "",
+    },
+
     creator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+
+    participants: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      default: [],
+    },
+
+    editors: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      default: [],
     },
 
     isActive: {

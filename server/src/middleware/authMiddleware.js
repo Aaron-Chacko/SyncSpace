@@ -1,14 +1,16 @@
-const jwt = require('jsonwebtoken');
+import { verifyToken } from "../utils/token.js";
 
-module.exports = (req, res, next) => {
-  const token = req.header('Authorization');
-  if (!token) return res.status(401).json({ message: 'No token, authorization denied' });
+export default function authMiddleware(req, res, next) {
+  const header = req.get("authorization") ?? "";
+  const [scheme, token] = header.split(" ");
+  if (scheme !== "Bearer" || !token) {
+    return res.status(401).json({ message: "A Bearer token is required." });
+  }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-    req.user = decoded;
-    next();
-  } catch (err) {
-    res.status(401).json({ message: 'Token is not valid' });
+    req.user = verifyToken(token);
+    return next();
+  } catch {
+    return res.status(401).json({ message: "Token is invalid or expired." });
   }
-};
+}

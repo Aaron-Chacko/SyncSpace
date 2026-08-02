@@ -1,4 +1,4 @@
-import Y from 'yjs';
+import * as Y from 'yjs';
 
 class YjsService {
   constructor() {
