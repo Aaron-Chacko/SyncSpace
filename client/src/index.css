@@ -963,3 +963,41 @@ button:disabled {
   cursor: not-allowed;
 
 }
+
+
+/* =========================
+   Error Pages
+========================= */
+
+.error-page {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+  padding: 40px;
+}
+
+.error-page svg {
+  color: #2563eb;
+}
+
+.error-page h1 {
+  font-size: 56px;
+  margin: 0;
+}
+
+.error-page h2 {
+  margin: 0;
+}
+
+.error-page p {
+  color: #666;
+  max-width: 450px;
+}
+
+.error-page button {
+  margin-top: 10px;
+}

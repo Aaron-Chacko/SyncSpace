@@ -6,8 +6,9 @@ import {
     History,
     LogOut,
     Loader2,
+    WifiOff,
+    ShieldX,
 } from "lucide-react";
-
 
 const Sidebar = () => {
     const navigate = useNavigate();
@@ -48,8 +49,14 @@ const Sidebar = () => {
                     <History size={18} />
                     <span>Replay</span>
                 </button>
-            </nav>
-
+                <button
+                    className={`sidebar-item ${location.pathname === "/network-error" ? "active" : ""
+                        }`}
+                    onClick={() => navigate("/network-error")}
+                >
+                    <WifiOff size={18} />
+                    <span>Network Error</span>
+                </button>
             <button
                 className={`sidebar-item ${location.pathname === "/loading" ? "active" : ""
                     }`}
@@ -58,6 +65,17 @@ const Sidebar = () => {
                 <Loader2 size={18} />
                 <span>Loading</span>
             </button>
+
+                <button
+                    className={`sidebar-item ${location.pathname === "/access-denied" ? "active" : ""
+                        }`}
+                    onClick={() => navigate("/access-denied")}
+                >
+                    <ShieldX size={18} />
+                    <span>Access Denied</span>
+                </button>
+            </nav>
+
 
             {/* Logout */}
             <button

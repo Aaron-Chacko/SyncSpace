@@ -13,6 +13,9 @@ import Navbar from "./components/Shared/Navbar";
 import { AuthProvider } from "./context/AuthContext";
 import Replay from "./pages/Replay";
 import Loading from "./pages/Loading";
+import NotFound from "./pages/NotFound";
+import NetworkError from "./pages/NetworkError";
+import AccessDenied from "./pages/AccessDenied";
 
 function App() {
   return (
@@ -35,7 +38,8 @@ function App() {
               <Route path="/signup" element={<Signup />} />
               <Route path="/replay" element={<Replay />} />
               <Route path="/loading" element={<Loading />} />
-
+              <Route path="/network-error" element={<NetworkError />} />
+              <Route path="/access-denied" element={<AccessDenied />} />
               <Route
                 path="/dashboard"
                 element={
@@ -53,6 +57,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
         </div>
