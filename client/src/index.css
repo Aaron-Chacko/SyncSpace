@@ -35,6 +35,8 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  letter-spacing: 0.2px;
 }
 
 h1,
@@ -149,33 +151,15 @@ button {
 
 .primary-btn,
 .secondary-btn {
-  padding: 12px 22px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: .3s;
+  transition: all .25s ease;
 }
 
-.primary-btn {
-  background: var(--accent-primary);
-  color: white;
-}
-
-.primary-btn:hover,
-.auth-form button:hover {
-  background: var(--accent-primary-hover);
-  transform: translateY(-2px);
-}
-
-.secondary-btn {
-  background: var(--bg-secondary);
-  color: white;
-  border: 1px solid var(--border-color);
+.primary-btn:hover {
+  box-shadow: 0 8px 18px rgba(99, 102, 241, .35);
 }
 
 .secondary-btn:hover {
-  background: var(--bg-tertiary);
+  box-shadow: 0 6px 14px rgba(255, 255, 255, .08);
 }
 
 .recent-rooms {
@@ -225,6 +209,12 @@ button {
   padding: 12px;
   border-radius: 8px;
   outline: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, .2);
 }
 
 .form-group textarea {
@@ -446,11 +436,12 @@ button {
   color: var(--text-primary);
   text-decoration: none;
   font-weight: 600;
-  transition: color 0.3s;
+  transition: all .25s ease;
 }
 
 .nav-links a:hover {
   color: var(--accent-primary);
+  transform: translateY(-2px);
 }
 
 .user-name {
@@ -622,11 +613,8 @@ button {
 }
 
 .sidebar-item:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.sidebar-item.active {
-  background: var(--accent-primary);
+  background: rgba(255, 255, 255, .12);
+  transform: translateX(6px);
 }
 
 .logout-btn {
@@ -679,6 +667,7 @@ button {
   padding: 35px;
   margin-bottom: 25px;
   color: white;
+  animation: fadeUp .6s ease;
 }
 
 .banner-content h1 {
@@ -715,8 +704,9 @@ button {
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
   border-color: var(--accent-primary);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, .25);
 }
 
 .stat-icon {
@@ -883,17 +873,12 @@ button {
   color: var(--text-secondary);
 }
 
-.replay-controls {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  flex-wrap: wrap;
+.replay-controls button {
+  transition: .25s;
 }
 
-.replay-controls button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.replay-controls button:hover {
+  transform: scale(1.05);
 }
 
 @media (max-width: 768px) {
@@ -994,10 +979,24 @@ button:disabled {
 }
 
 .error-page p {
-  color: #666;
+  color: var(--text-secondary);
   max-width: 450px;
 }
 
 .error-page button {
   margin-top: 10px;
+}
+
+@keyframes fadeUp {
+
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
 }
