@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CreateRoom from "../components/Dashboard/CreateRoom";
 import JoinRoom from "../components/Dashboard/JoinRoom";
 import RoomCard from "../components/Dashboard/RoomCard";
@@ -7,6 +8,7 @@ import DeleteRoom from "../components/Dashboard/DeleteRoom";
 import InviteUser from "../components/Dashboard/InviteUser";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showJoinRoom, setShowJoinRoom] = useState(false);
   const [showDeleteRoom, setShowDeleteRoom] = useState(false);
@@ -18,22 +20,42 @@ const Dashboard = () => {
     {
       id: "room-1",
       name: "Frontend Team",
+      creator: "Aaron",
+      activeUsersCount: 3,
+      description: "React UI Development",
       createdDate: "26 Jul 2026",
-      members: 3,
     },
     {
       id: "room-2",
       name: "Backend Team",
+      creator: "Rahul",
+      activeUsersCount: 2,
+      description: "Socket.io & APIs",
       createdDate: "25 Jul 2026",
-      members: 2,
     },
     {
       id: "room-3",
       name: "Interview Room",
+      creator: "Admin",
+      activeUsersCount: 5,
+      description: "Whiteboard Practice",
       createdDate: "24 Jul 2026",
-      members: 5,
     },
   ];
+
+  const handleCreateRoom = (roomName) => {
+    // Generate a random 6-character room code
+    const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    console.log(`Creating room: ${roomName} (${randomCode})`);
+    setShowCreateRoom(false);
+    navigate(`/room/${randomCode}`);
+  };
+
+  const handleJoinRoom = (roomId) => {
+    console.log(`Joining room: ${roomId}`);
+    setShowJoinRoom(false);
+    navigate(`/room/${roomId}`);
+  };
 
   return (
     <div className="dashboard-page">
@@ -74,7 +96,7 @@ const Dashboard = () => {
         onClose={() => setShowCreateRoom(false)}
         title="Create Room"
       >
-        <CreateRoom />
+        <CreateRoom onCreate={handleCreateRoom} />
       </Modal>
 
       {/* Join Room Modal */}
@@ -83,7 +105,7 @@ const Dashboard = () => {
         onClose={() => setShowJoinRoom(false)}
         title="Join Room"
       >
-        <JoinRoom />
+        <JoinRoom onJoin={handleJoinRoom} />
       </Modal>
 
       {/* Invite User Modal */}
@@ -137,9 +159,7 @@ const Dashboard = () => {
         ) : (
           <div className="empty-state">
             <h3>No Rooms Found</h3>
-
             <p>You haven't created or joined any rooms yet.</p>
-
             <button
               className="primary-btn"
               onClick={() => {
