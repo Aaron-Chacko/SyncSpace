@@ -22,11 +22,13 @@ const JoinRoom = () => {
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Room Code</label>
+          <label htmlFor="roomCode">Room Code</label>
 
           <input
+            id="roomCode"
             type="text"
             placeholder="Enter Room Code"
+            aria-label="Room Code"
             value={roomCode}
             onChange={(e) => setRoomCode(e.target.value)}
             required
@@ -36,6 +38,7 @@ const JoinRoom = () => {
         <button
           type="submit"
           className="secondary-btn"
+          aria-label="Join Room"
         >
           Join Room
         </button>

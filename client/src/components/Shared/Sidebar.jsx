@@ -26,6 +26,8 @@ const Sidebar = () => {
                     className={`sidebar-item ${location.pathname === "/dashboard" ? "active" : ""
                         }`}
                     onClick={() => navigate("/dashboard")}
+                    aria-label="Dashboard"
+                    title="Dashboard"
                 >
                     <LayoutDashboard size={18} />
                     <span>Dashboard</span>
@@ -35,6 +37,8 @@ const Sidebar = () => {
                 <button
                     className="sidebar-item"
                     onClick={() => navigate("/dashboard")}
+                    aria-label="Rooms"
+                    title="Rooms"
                 >
                     <FolderOpen size={18} />
                     <span>Rooms</span>
@@ -45,47 +49,60 @@ const Sidebar = () => {
                     className={`sidebar-item ${location.pathname === "/replay" ? "active" : ""
                         }`}
                     onClick={() => navigate("/replay")}
+                    aria-label="Replay"
+                    title="Replay"
                 >
                     <History size={18} />
                     <span>Replay</span>
                 </button>
+
+                {/* Network Error */}
                 <button
                     className={`sidebar-item ${location.pathname === "/network-error" ? "active" : ""
                         }`}
                     onClick={() => navigate("/network-error")}
+                    aria-label="Network Error"
+                    title="Network Error"
                 >
                     <WifiOff size={18} />
                     <span>Network Error</span>
                 </button>
-            <button
-                className={`sidebar-item ${location.pathname === "/loading" ? "active" : ""
-                    }`}
-                onClick={() => navigate("/loading")}
-            >
-                <Loader2 size={18} />
-                <span>Loading</span>
-            </button>
 
+                {/* Loading */}
+                <button
+                    className={`sidebar-item ${location.pathname === "/loading" ? "active" : ""
+                        }`}
+                    onClick={() => navigate("/loading")}
+                    aria-label="Loading"
+                    title="Loading"
+                >
+                    <Loader2 size={18} />
+                    <span>Loading</span>
+                </button>
+
+                {/* Access Denied */}
                 <button
                     className={`sidebar-item ${location.pathname === "/access-denied" ? "active" : ""
                         }`}
                     onClick={() => navigate("/access-denied")}
+                    aria-label="Access Denied"
+                    title="Access Denied"
                 >
                     <ShieldX size={18} />
                     <span>Access Denied</span>
                 </button>
             </nav>
 
-
             {/* Logout */}
             <button
                 className="sidebar-item logout-btn"
                 onClick={() => navigate("/")}
+                aria-label="Logout"
+                title="Logout"
             >
                 <LogOut size={18} />
                 <span>Logout</span>
             </button>
-
         </aside>
     );
 };

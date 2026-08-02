@@ -1000,3 +1000,25 @@ button:disabled {
   }
 
 }
+
+/* =========================
+   Accessibility
+========================= */
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid #6366f1;
+  outline-offset: 3px;
+}
+
+.sidebar-item:focus-visible {
+  background: rgba(99, 102, 241, 0.18);
+}
+
+.primary-btn:focus-visible,
+.secondary-btn:focus-visible {
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.35);
+}

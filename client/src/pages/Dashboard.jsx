@@ -41,8 +41,8 @@ const Dashboard = () => {
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <div className="dashboard-page">
 
+      <div className="dashboard-page">
         <DashboardBanner />
 
         <DashboardStats
@@ -55,11 +55,11 @@ const Dashboard = () => {
           filesShared={0}
         />
 
-
         {/* Action Buttons */}
         <div className="dashboard-actions">
           <button
             className="primary-btn"
+            aria-label="Create Room"
             onClick={() => {
               setShowCreateRoom(true);
               setShowJoinRoom(false);
@@ -70,6 +70,7 @@ const Dashboard = () => {
 
           <button
             className="secondary-btn"
+            aria-label="Join Room"
             onClick={() => {
               setShowJoinRoom(true);
               setShowCreateRoom(false);
@@ -124,6 +125,7 @@ const Dashboard = () => {
             />
           )}
         </Modal>
+
         {/* Recent Rooms */}
         <section className="recent-rooms">
           <h2>Recent Rooms</h2>
@@ -153,6 +155,7 @@ const Dashboard = () => {
 
               <button
                 className="primary-btn"
+                aria-label="Create Your First Room"
                 onClick={() => {
                   setShowCreateRoom(true);
                   setShowJoinRoom(false);

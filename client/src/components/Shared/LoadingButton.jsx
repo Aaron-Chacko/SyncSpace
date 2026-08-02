@@ -11,6 +11,8 @@ const LoadingButton = ({
         <button
             className={className}
             disabled={loading}
+            aria-busy={loading}
+            aria-live="polite"
             {...props}
         >
             {loading ? <Loader size={18} /> : children}

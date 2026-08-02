@@ -25,6 +25,7 @@ const ReplayPanel = () => {
           value="25"
           readOnly
           className="timeline-slider"
+          aria-label="Replay Timeline"
         />
 
         <div className="timeline-time">
@@ -34,22 +35,38 @@ const ReplayPanel = () => {
       </div>
 
       <div className="replay-controls">
-        <button className="secondary-btn">
+        <button
+          className="secondary-btn"
+          aria-label="Previous Frame"
+          title="Previous Frame"
+        >
           <SkipBack size={18} />
           Previous
         </button>
 
-        <button className="primary-btn">
+        <button
+          className="primary-btn"
+          aria-label="Play Replay"
+          title="Play Replay"
+        >
           <Play size={18} />
           Play
         </button>
 
-        <button className="secondary-btn">
+        <button
+          className="secondary-btn"
+          aria-label="Pause Replay"
+          title="Pause Replay"
+        >
           <Pause size={18} />
           Pause
         </button>
 
-        <button className="secondary-btn">
+        <button
+          className="secondary-btn"
+          aria-label="Next Frame"
+          title="Next Frame"
+        >
           <SkipForward size={18} />
           Next
         </button>
