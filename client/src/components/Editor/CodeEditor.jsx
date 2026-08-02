@@ -8,6 +8,7 @@ import { useSocketContext } from '../../context/SocketContext';
 import LanguageSelector from './LanguageSelector';
 import { Terminal, AlertCircle, X, Maximize2, Minimize2, Eye, GitBranch, RefreshCw, TerminalSquare } from 'lucide-react';
 import './Editor.css';
+import socket from '../../services/socket';
 
 // ============================================
 // SUPPORTED LANGUAGES
@@ -298,6 +299,7 @@ const CodeEditor = ({
   userId,
   userName,
   userColor,
+  canEdit = false,
   isReplayMode = false,
 }) => {
   const socket = useSocketContext();
@@ -318,7 +320,7 @@ const CodeEditor = ({
   const [wordWrap, setWordWrap] = useState('on');
   const [minimap, setMinimap] = useState(true);
   const [lineNumbers, setLineNumbers] = useState('on');
-  const [isReadOnly] = useState(isReplayMode);
+  const isReadOnly = isReplayMode || !canEdit;
   const [saveStatus, setSaveStatus] = useState('Workspace: Connected');
   const [isSaving, setIsSaving] = useState(false);
   const [connectedUsers, setConnectedUsers] = useState([]);
@@ -345,6 +347,20 @@ const CodeEditor = ({
   const saveTimeoutRef = useRef(null);
   const yDocRef = useRef(null);
   const yAwarenessRef = useRef(null);
+  const applyingRemoteChangeRef = useRef(false);
+
+  useEffect(() => {
+    if (!roomId) return undefined;
+    const handleCodeChange = (data) => {
+      if (data.room !== roomId || typeof data.code !== 'string') return;
+      applyingRemoteChangeRef.current = true;
+      setCode(data.code);
+      if (data.language) setLanguage(data.language);
+      window.setTimeout(() => { applyingRemoteChangeRef.current = false; }, 0);
+    };
+    socket.on('code-change', handleCodeChange);
+    return () => socket.off('code-change', handleCodeChange);
+  }, [roomId]);
 
   // ============================================
   // GET USER COLOR
@@ -699,6 +715,17 @@ const CodeEditor = ({
     }
   }, []);
 
+const handleEditorChange = useCallback((value) => {
+  const nextCode = value || '';
+  setCode(nextCode);
+  if (!roomId || !canEdit || applyingRemoteChangeRef.current) return;
+  socket.emit('code-change', {
+    room: roomId,
+    code: nextCode,
+    language,
+  });
+}, [roomId, canEdit, language]);
+
   const handleFontSizeChange = useCallback((newSize) => {
     setFontSize(newSize);
     if (editorRef.current) {
@@ -828,6 +855,7 @@ const CodeEditor = ({
             language={language}
             theme={editorTheme}
             value={code}
+            onChange={handleEditorChange}
             onMount={handleEditorDidMount}
             options={{
               automaticLayout: true,

@@ -1,19 +1,11 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000", {
-  autoConnect: true,
-});
+const socket = io(import.meta.env.VITE_SOCKET_URL ?? "http://localhost:5000", { autoConnect: false });
 
-socket.on("connect", () => {
-  console.log("🟢 Connected:", socket.id);
-});
+export const connectSocket = (token) => {
+  socket.auth = { token };
+  if (!socket.connected) socket.connect();
+};
 
-socket.on("disconnect", (reason) => {
-  console.log("🔴 Disconnected:", reason);
-});
-
-socket.on("connect_error", (err) => {
-  console.error("❌ Connection Error:", err.message);
-});
-
+export const disconnectSocket = () => socket.disconnect();
 export default socket;
