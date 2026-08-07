@@ -1,3 +1,6 @@
+// NOTE:
+// Using non-SRV MongoDB URI because SRV fails on some networks (e.g., mobile hotspot DNS issues)
+
 import mongoose from "mongoose";
 
 const connectDB = async () => {
