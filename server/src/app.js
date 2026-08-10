@@ -192,10 +192,38 @@ async function executeLocalCode(language, code, stdin) {
 
 /* -------------------- Code Execution Route -------------------- */
 
-app.post("/api/execute", async (req, res) => {
-  const { language, code, stdin } = req.body;
-  if (!code) {
-    return res.status(400).json({ error: "Code is required" });
+  app.post("/api/execute", async (req, res) => {
+  const { language, code, stdin = "" } = req.body;
+
+  const supportedLanguages = [
+    "javascript",
+    "typescript",
+    "python",
+    "java",
+    "cpp",
+    "c",
+    "go",
+    "rust",
+    "ruby",
+    "php",
+  ];
+
+  if (!language || !supportedLanguages.includes(language)) {
+    return res.status(400).json({
+      error: "Unsupported or missing programming language",
+    });
+  }
+
+  if (typeof code !== "string" || !code.trim()) {
+    return res.status(400).json({
+      error: "Code is required",
+    });
+  }
+
+  if (typeof stdin !== "string") {
+    return res.status(400).json({
+      error: "Input must be a string",
+    });
   }
 
   try {
