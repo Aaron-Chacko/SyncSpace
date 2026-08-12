@@ -20,7 +20,16 @@ const roomResponse = (room) => ({
   createdAt: room.createdAt,
 });
 
-const createRoomCode = () => crypto.randomBytes(3).toString("hex").toUpperCase();
+const createRoomCode = () => {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+
+  for (let i = 0; i < 6; i += 1) {
+    code += alphabet[crypto.randomInt(0, alphabet.length)];
+  }
+
+  return code;
+};
 
 export async function createRoom(req, res, next) {
   try {
