@@ -145,6 +145,8 @@ const Room = () => {
           viewMode={viewMode}
           onSetViewMode={setViewMode}
           roomUsers={roomUsers}
+          roomId={roomId}
+          copied={copied}
           onShare={copyRoomCode}
         />
 
