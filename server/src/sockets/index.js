@@ -128,11 +128,12 @@ export function initializeSocket(server) {
         const isHost =
           room.creator.toString() === socket.user.id;
 
+        // Host always gets edit access; other users need to be in editors list
         const canEditRoom =
           isHost ||
-          (room.editors ?? []).some(
+          ((room.editors ?? []).some(
             (editor) => editor.toString() === socket.user.id
-          );
+          ));
 
         socket.join(roomCode);
 

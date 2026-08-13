@@ -51,6 +51,7 @@ const Canvas = ({ canEdit = false }) => {
   const [stickyInput, setStickyInput] = useState(null);
   const [stickyVal, setStickyVal] = useState('');
   const [remoteCursors, setRemoteCursors] = useState({});
+  const [remoteInProgress, setRemoteInProgress] = useState({});
 
   const {
     tool,
@@ -90,12 +91,18 @@ const Canvas = ({ canEdit = false }) => {
     }
   }, [selectedId, elements]);
 
-  // Socket event listeners
+// Socket event listeners
 useEffect(() => {
   if (!socket) return;
 
   const handleDrawElement = (remoteEl) => {
     setElementsRaw((prev) => [...prev, remoteEl]);
+    // Clear in-progress for this element when finalized
+    setRemoteInProgress((prev) => {
+      const next = { ...prev };
+      delete next[remoteEl.id];
+      return next;
+    });
   };
 
   const handleUpdateElement = (updatedEl) => {
@@ -107,11 +114,11 @@ useEffect(() => {
   const handleClearCanvas = () => {
     setElementsRaw([]);
     setSelectedId(null);
+    setRemoteInProgress({});
   };
 
   const handleCursorMove = (data) => {
     if (data.socketId === socket.id) return;
-
     setRemoteCursors((prev) => ({
       ...prev,
       [data.socketId]: data,
@@ -124,6 +131,20 @@ useEffect(() => {
       delete next[data.socketId];
       return next;
     });
+    setRemoteInProgress((prev) => {
+      const next = { ...prev };
+      delete next[data.socketId];
+      return next;
+    });
+  };
+
+  // Live drawing in-progress from other users
+  const handleDrawInProgress = (data) => {
+    if (!data?.socketId || !data?.element) return;
+    setRemoteInProgress((prev) => ({
+      ...prev,
+      [data.socketId]: data.element,
+    }));
   };
 
   socket.on("draw-element", handleDrawElement);
@@ -131,6 +152,7 @@ useEffect(() => {
   socket.on("clear-canvas", handleClearCanvas);
   socket.on("cursor-move", handleCursorMove);
   socket.on("cursor-leave", handleCursorLeave);
+  socket.on("draw-in-progress", handleDrawInProgress);
 
   return () => {
     socket.off("draw-element", handleDrawElement);
@@ -138,6 +160,7 @@ useEffect(() => {
     socket.off("clear-canvas", handleClearCanvas);
     socket.off("cursor-move", handleCursorMove);
     socket.off("cursor-leave", handleCursorLeave);
+    socket.off("draw-in-progress", handleDrawInProgress);
   };
 }, [socket, setElementsRaw, setSelectedId]);
 
@@ -335,38 +358,50 @@ useEffect(() => {
 
     if (!isDrawing || !newElement) return;
 
+    let updatedElement = newElement;
+
     if (newElement.type === 'line') {
-      setNewElement({
+      updatedElement = {
         ...newElement,
         points: [...newElement.points, pointGrid.x, pointGrid.y]
-      });
+      };
     } else if (newElement.type === 'rect') {
-      setNewElement({
+      updatedElement = {
         ...newElement,
         width: pointGrid.x - newElement.x,
         height: pointGrid.y - newElement.y
-      });
+      };
     } else if (newElement.type === 'circle') {
       const radius = Math.sqrt(
         Math.pow(pointGrid.x - newElement.x, 2) + Math.pow(pointGrid.y - newElement.y, 2)
       );
-      setNewElement({ ...newElement, radius });
+      updatedElement = { ...newElement, radius };
     } else if (newElement.type === 'ellipse') {
-      setNewElement({
+      updatedElement = {
         ...newElement,
         radiusX: Math.abs(pointGrid.x - newElement.x),
         radiusY: Math.abs(pointGrid.y - newElement.y)
-      });
+      };
     } else if (newElement.type === 'straight-line') {
-      setNewElement({
+      updatedElement = {
         ...newElement,
         x2: pointGrid.x,
         y2: pointGrid.y
-      });
+      };
     } else if (newElement.type === 'arrow') {
-      setNewElement({
+      updatedElement = {
         ...newElement,
         points: [newElement.points[0], newElement.points[1], pointGrid.x, pointGrid.y]
+      };
+    }
+
+    setNewElement(updatedElement);
+
+    // Broadcast in-progress drawing to other users so they see it live
+    if (socket) {
+      socket.emit('draw-in-progress', {
+        room: activeRoom,
+        element: updatedElement
       });
     }
   };
@@ -945,6 +980,27 @@ useEffect(() => {
               />
             </Group>
           ))}
+        </Layer>
+
+        {/* Remote In-Progress Drawing Layer */}
+        <Layer>
+          {Object.values(remoteInProgress).map((el) => {
+            if (!el) return null;
+            if (el.type === 'line') {
+              return <Line key={el.id} points={el.points} stroke={el.color} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} tension={0.5} lineCap="round" lineJoin="round" globalCompositeOperation={el.tool === 'eraser' ? 'destination-out' : 'source-over'} />;
+            } else if (el.type === 'rect') {
+              return <Rect key={el.id} x={el.x} y={el.y} width={el.width} height={el.height} stroke={el.color} fill={el.fillColor !== 'transparent' ? el.fillColor : undefined} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} />;
+            } else if (el.type === 'circle') {
+              return <Circle key={el.id} x={el.x} y={el.y} radius={el.radius} stroke={el.color} fill={el.fillColor !== 'transparent' ? el.fillColor : undefined} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} />;
+            } else if (el.type === 'ellipse') {
+              return <Ellipse key={el.id} x={el.x} y={el.y} radiusX={el.radiusX} radiusY={el.radiusY} stroke={el.color} fill={el.fillColor !== 'transparent' ? el.fillColor : undefined} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} />;
+            } else if (el.type === 'straight-line') {
+              return <Line key={el.id} points={[el.x1, el.y1, el.x2, el.y2]} stroke={el.color} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} lineCap="round" />;
+            } else if (el.type === 'arrow') {
+              return <Arrow key={el.id} points={el.points} stroke={el.color} fill={el.color} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} pointerLength={10} pointerWidth={10} />;
+            }
+            return null;
+          })}
         </Layer>
       </Stage>
     </div>

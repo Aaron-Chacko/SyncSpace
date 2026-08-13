@@ -14,6 +14,16 @@ export default function whiteboardSocketHandler(io, socket, getJoinedRoom, canEd
   relayElement(SOCKET_EVENTS.DRAW_ELEMENT);
   relayElement(SOCKET_EVENTS.UPDATE_ELEMENT);
 
+  // Relay live in-progress drawing strokes so other users see drawing happen in real-time
+  socket.on("draw-in-progress", (data = {}) => {
+    const roomCode = getJoinedRoom(data.room);
+    if (!roomCode || !canEdit(roomCode) || !data.element || typeof data.element !== "object") return;
+    socket.to(roomCode).emit("draw-in-progress", {
+      socketId: socket.id,
+      element: data.element,
+    });
+  });
+
   socket.on(SOCKET_EVENTS.DRAW_LINE, (data = {}) => {
     const roomCode = getJoinedRoom(data.room);
     if (roomCode && canEdit(roomCode)) socket.to(roomCode).emit(SOCKET_EVENTS.DRAW_LINE, data);
