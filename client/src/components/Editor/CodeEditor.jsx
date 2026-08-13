@@ -1,14 +1,12 @@
-// src/components/CodeEditor.jsx
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 import * as Y from 'yjs';
 import { MonacoBinding } from 'y-monaco';
 import * as awarenessProtocol from 'y-protocols/awareness';
 import { useSocketContext } from '../../context/SocketContext';
 import LanguageSelector from './LanguageSelector';
-import { Terminal, AlertCircle, X, Maximize2, Minimize2, Eye, GitBranch, RefreshCw, TerminalSquare } from 'lucide-react';
+import { AlertCircle, X, Maximize2, Minimize2, GitBranch, RefreshCw, TerminalSquare } from 'lucide-react';
 import './Editor.css';
-import socket from '../../services/socket';
 
 // ============================================
 // SUPPORTED LANGUAGES
@@ -308,7 +306,7 @@ const CodeEditor = ({
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem('syncspace_editor_lang') || 'javascript';
   });
-  const [code, setCode] = useState(() => {
+  const [_code, setCode] = useState(() => {
     const saved = localStorage.getItem('syncspace_editor_code');
     if (saved) return saved;
     return CODE_TEMPLATES['javascript'] || '';
@@ -325,7 +323,6 @@ const CodeEditor = ({
   const [isSaving, setIsSaving] = useState(false);
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [isCollaborative, setIsCollaborative] = useState(false);
-  const [doc, setDoc] = useState(null);
 
   // ----- STATUS BAR STATES -----
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
@@ -347,7 +344,6 @@ const CodeEditor = ({
   const saveTimeoutRef = useRef(null);
   const yDocRef = useRef(null);
   const yAwarenessRef = useRef(null);
-  const applyingRemoteChangeRef = useRef(false);
 
   // Helper to ensure Socket.io binary updates convert cleanly to Uint8Array
   const safeUint8Array = useCallback((update) => {
@@ -394,7 +390,6 @@ const CodeEditor = ({
     // Create Yjs document
     const yDoc = new Y.Doc();
     yDocRef.current = yDoc;
-    setDoc(yDoc);
 
     const yText = yDoc.getText('code');
 
@@ -652,7 +647,7 @@ const CodeEditor = ({
     setConsoleTab('output');
 
     try {
-      const response = await fetch('http://localhost:5000/api/execute', {
+      const response = await fetch('/api/execute', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -645,7 +645,7 @@ useEffect(() => {
 
         <Layer>
           {elements.map((el) => {
-            const isSelected = selectedId === el.id;
+            const _isSelected = selectedId === el.id;
             const isDraggable = tool === 'select' && canEdit;
 
             if (el.type === 'line') {

@@ -1,48 +1,51 @@
-import React from "react";
-//import { useNavigate, useLocation } from "react-router-dom";
-/*import {
-    LayoutDashboard,
-    FolderOpen,
-    History,
-    LogOut,
-    Loader2,
-    WifiOff,
-    ShieldX,
-} from "lucide-react"; */
+import { Link, useLocation } from "react-router-dom";
+import { LayoutDashboard, FolderKanban, History, Sparkles, Layers } from "lucide-react";
 
-const Sidebar = ({
-  roomUsers = [],
-  isHost = false,
-  onGrantAccess = () => {},
-  pendingRequests = [],
-}) => {
+const Sidebar = () => {
+  const location = useLocation();
+
+  const navItems = [
+    { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { label: "Active Rooms", path: "/dashboard", icon: FolderKanban },
+    { label: "Replay & History", path: "/replay", icon: History },
+  ];
+
   return (
-    <aside
-      className="app-sidebar"
-      style={{
-        width: "250px",
-        background: "var(--bg-secondary)",
-        padding: "20px",
-        borderRight: "1px solid var(--border-color)",
-      }}
-    >
-      <h3>Participants</h3>
+    <aside className="rich-dashboard-sidebar">
+      <div className="sidebar-header">
+        <div className="sidebar-brand">
+          <Layers size={18} className="brand-icon" />
+          <span>Workspace</span>
+        </div>
+      </div>
 
-      <p>{roomUsers.length} user(s) connected</p>
+      <div className="sidebar-nav-group">
+        <span className="sidebar-group-title">NAVIGATION</span>
+        <nav className="sidebar-nav-list">
+          {navItems.map((item, idx) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path && idx === 0;
+            return (
+              <Link
+                key={item.label}
+                to={item.path}
+                className={`sidebar-nav-item ${isActive ? "active" : ""}`}
+              >
+                <Icon size={16} className="nav-item-icon" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
 
-      <ul style={{ paddingLeft: "20px" }}>
-        {roomUsers.map((user) => (
-          <li key={user.socketId} style={{ marginBottom: "10px" }}>
-            <strong>{user.name || user.socketId}</strong>{user.isHost ? " (Host)" : user.canEdit ? " (Editor)" : " (Viewer)"}
-            {isHost && !user.isHost && (
-              <button type="button" className="secondary-btn" style={{ marginLeft: "6px", padding: "2px 6px", fontSize: "11px" }} onClick={() => onGrantAccess(user.userId, !user.canEdit)}>
-                {user.canEdit ? "Remove edit" : "Grant edit"}
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
-      {isHost && pendingRequests.length > 0 && <div><h4>Edit requests</h4>{pendingRequests.map((request) => <div key={request.userId}><span>{request.name}</span><button type="button" className="primary-btn" style={{ marginLeft: "6px", padding: "2px 6px", fontSize: "11px" }} onClick={() => onGrantAccess(request.userId, true)}>Approve</button></div>)}</div>}
+      <div className="sidebar-footer-card">
+        <div className="footer-card-badge">
+          <Sparkles size={14} color="#a855f7" />
+          <span>SyncSpace v2.0</span>
+        </div>
+        <p className="footer-card-desc">Real-time code & canvas engine ready</p>
+      </div>
     </aside>
   );
 };

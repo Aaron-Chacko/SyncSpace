@@ -4,7 +4,7 @@ export const WhiteboardContext = createContext(null);
 
 export const WhiteboardProvider = ({ children }) => {
   const [tool, setTool] = useState('pencil');
-  const [color, setColor] = useState('#6366f1');
+  const [color, setColor] = useState('#ffffff');
   const [fillColor, setFillColor] = useState('transparent');
   const [opacity, setOpacity] = useState(1);
   const [strokeWidth, setStrokeWidth] = useState(4);

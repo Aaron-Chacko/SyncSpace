@@ -1,4 +1,4 @@
-import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Users,
   CalendarDays,
@@ -8,6 +8,14 @@ import {
 } from "lucide-react";
 
 const RoomCard = ({ room, onInvite, onDelete }) => {
+  const navigate = useNavigate();
+
+  const handleJoin = () => {
+    if (room.roomCode) {
+      navigate(`/room/${room.roomCode}`);
+    }
+  };
+
   return (
     <div className="room-card">
       <div className="room-card-header">
@@ -29,35 +37,38 @@ const RoomCard = ({ room, onInvite, onDelete }) => {
       <div className="room-card-actions">
         {/* Join */}
         <button
-          className="primary-btn"
+          type="button"
+          className="room-card-btn room-join-btn"
           aria-label={`Join ${room.name}`}
           title={`Join ${room.name}`}
-          onClick={() => alert(`Joining ${room.name}`)}
+          onClick={handleJoin}
         >
-          <LogIn size={16} />
-          Join
+          <LogIn size={15} />
+          <span>Join</span>
         </button>
 
         {/* Invite */}
         <button
-          className="secondary-btn"
+          type="button"
+          className="room-card-btn room-invite-btn"
           aria-label={`Invite users to ${room.name}`}
           title={`Invite users to ${room.name}`}
           onClick={() => onInvite(room)}
         >
-          <UserPlus size={16} />
-          Invite
+          <UserPlus size={15} />
+          <span>Invite</span>
         </button>
 
         {/* Delete */}
         <button
-          className="secondary-btn delete-btn"
+          type="button"
+          className="room-card-btn room-delete-btn"
           aria-label={`Delete ${room.name}`}
           title={`Delete ${room.name}`}
           onClick={() => onDelete(room)}
         >
-          <Trash2 size={16} />
-          Delete
+          <Trash2 size={15} />
+          <span>Delete</span>
         </button>
       </div>
     </div>
