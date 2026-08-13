@@ -283,10 +283,22 @@ useEffect(() => {
       return;
     }
 
+    if (tool === 'eraser') {
+      setIsDrawing(true);
+      const hit = findElementAtPosition(pointGrid.x, pointGrid.y, elements);
+      if (hit) {
+        setElements(elements.filter((el) => el.id !== hit.id));
+        if (socket) {
+          socket.emit('delete-elements', { room: activeRoom, ids: [hit.id] });
+        }
+      }
+      return;
+    }
+
     setIsDrawing(true);
     const elementId = 'el_' + Date.now().toString() + Math.random().toString(36).substring(2, 5);
 
-    if (tool === 'pencil' || tool === 'eraser') {
+    if (tool === 'pencil') {
       setNewElement({
         id: elementId,
         type: 'line',
@@ -373,6 +385,19 @@ useEffect(() => {
       });
     }
 
+    if (tool === 'eraser') {
+      if (isDrawing) {
+        const hit = findElementAtPosition(pointGrid.x, pointGrid.y, elements);
+        if (hit) {
+          setElements(elements.filter((el) => el.id !== hit.id));
+          if (socket) {
+            socket.emit('delete-elements', { room: activeRoom, ids: [hit.id] });
+          }
+        }
+      }
+      return;
+    }
+
     if (!isDrawing || !newElement) return;
 
     let updatedElement = newElement;
@@ -425,6 +450,7 @@ useEffect(() => {
 
   // Helper: check if a point is near any point in a polyline (eraser hit test)
   const pointNearPolyline = (px, py, points, threshold) => {
+    if (!points || points.length < 2) return false;
     for (let i = 0; i < points.length - 2; i += 2) {
       const ax = points[i], ay = points[i + 1];
       const bx = points[i + 2], by = points[i + 3];
@@ -438,37 +464,40 @@ useEffect(() => {
     return false;
   };
 
-  // Helper: check if eraser path intersects with an element's bounding area
-  const eraserHitsElement = (eraserEl, el) => {
-    if (!eraserEl?.points?.length) return false;
-    const threshold = (eraserEl.strokeWidth || 10) * 2;
-    const pts = eraserEl.points;
-
-    // Sample eraser points and check proximity to element center/points
-    for (let i = 0; i < pts.length - 1; i += 2) {
-      const ex = pts[i], ey = pts[i + 1];
-
-      if (el.type === 'line' && el.points?.length) {
-        if (pointNearPolyline(ex, ey, el.points, threshold)) return true;
+  // Helper: find element at pointer position
+  const findElementAtPosition = (x, y, elements, threshold = 15) => {
+    // Search in reverse order to check top-most elements first
+    for (let i = elements.length - 1; i >= 0; i--) {
+      const el = elements[i];
+      if (el.type === 'line' || el.type === 'straight-line' || el.type === 'arrow') {
+        const pts = el.points || [el.x1, el.y1, el.x2, el.y2];
+        if (pointNearPolyline(x, y, pts, threshold + (el.strokeWidth || 4))) {
+          return el;
+        }
       } else if (el.type === 'rect') {
-        if (ex >= el.x - threshold && ex <= el.x + (el.width || 0) + threshold &&
-            ey >= el.y - threshold && ey <= el.y + (el.height || 0) + threshold) return true;
+        if (x >= el.x && x <= el.x + (el.width || 0) &&
+            y >= el.y && y <= el.y + (el.height || 0)) {
+          return el;
+        }
       } else if (el.type === 'circle') {
-        if (Math.hypot(ex - el.x, ey - el.y) <= (el.radius || 0) + threshold) return true;
+        const dist = Math.hypot(x - el.x, y - el.y);
+        if (dist <= (el.radius || 0) + threshold) {
+          return el;
+        }
       } else if (el.type === 'ellipse') {
-        const rx = (el.radiusX || 0) + threshold, ry = (el.radiusY || 0) + threshold;
-        if (((ex - el.x) ** 2) / (rx * rx) + ((ey - el.y) ** 2) / (ry * ry) <= 1) return true;
-      } else if (el.type === 'straight-line') {
-        if (pointNearPolyline(ex, ey, [el.x1, el.y1, el.x2, el.y2], threshold)) return true;
-      } else if (el.type === 'arrow') {
-        if (el.points?.length && pointNearPolyline(ex, ey, el.points, threshold)) return true;
+        const rx = el.radiusX || 0, ry = el.radiusY || 0;
+        if (((x - el.x) ** 2) / ((rx + threshold) ** 2) + ((y - el.y) ** 2) / ((ry + threshold) ** 2) <= 1) {
+          return el;
+        }
       } else if (el.type === 'text' || el.type === 'sticky' || el.type === 'image') {
-        const w = el.width || 100, h = el.height || 40;
-        if (ex >= el.x - threshold && ex <= el.x + w + threshold &&
-            ey >= el.y - threshold && ey <= el.y + h + threshold) return true;
+        const w = el.width || 120, h = el.height || 80;
+        if (x >= el.x && x <= el.x + w &&
+            y >= el.y && y <= el.y + h) {
+          return el;
+        }
       }
     }
-    return false;
+    return null;
   };
 
   const handleMouseUp = () => {
@@ -476,16 +505,7 @@ useEffect(() => {
     setIsDrawing(false);
 
     if (newElement) {
-      // ERASER: delete all elements that the eraser stroke touches
       if (newElement.tool === 'eraser') {
-        const toDelete = elements.filter((el) => eraserHitsElement(newElement, el));
-        if (toDelete.length > 0) {
-          const deleteIds = toDelete.map((el) => el.id);
-          setElements(elements.filter((el) => !deleteIds.includes(el.id)));
-          if (socket) {
-            socket.emit('delete-elements', { room: activeRoom, ids: deleteIds });
-          }
-        }
         setNewElement(null);
         return;
       }

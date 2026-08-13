@@ -1,8 +1,14 @@
-import React, { createContext, useState, useCallback, useRef } from 'react';
+import React, { createContext, useState, useCallback, useRef, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useSocketContext } from './SocketContext';
 
 export const WhiteboardContext = createContext(null);
 
 export const WhiteboardProvider = ({ children }) => {
+  const socket = useSocketContext();
+  const { roomId } = useParams();
+  const activeRoom = roomId || 'default-room';
+
   const [tool, setTool] = useState('pencil');
   const [color, setColor] = useState('#ffffff');
   const [fillColor, setFillColor] = useState('transparent');
@@ -22,42 +28,55 @@ export const WhiteboardProvider = ({ children }) => {
   const [history, setHistory] = useState([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
 
-  // for store elements and update history
-  const setElements = useCallback((newElementsOrFn) => {
-    setElementsState((prev) => {
-      const next = typeof newElementsOrFn === 'function' ? newElementsOrFn(prev) : newElementsOrFn;
-
+  // Keep history in sync with elements changes (local or remote) automatically
+  useEffect(() => {
+    const currentHistoryState = history[historyIndex];
+    if (JSON.stringify(currentHistoryState) !== JSON.stringify(elements)) {
       const newHistory = history.slice(0, historyIndex + 1);
-      newHistory.push(next);
+      newHistory.push(elements);
       setHistory(newHistory);
       setHistoryIndex(newHistory.length - 1);
+    }
+  }, [elements, history, historyIndex]);
 
-      return next;
-    });
-  }, [history, historyIndex]);
+  // for store elements and update state
+  const setElements = useCallback((newElementsOrFn) => {
+    setElementsState(newElementsOrFn);
+  }, []);
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
       const prevIndex = historyIndex - 1;
       setHistoryIndex(prevIndex);
-      setElementsState(history[prevIndex]);
+      const nextElements = history[prevIndex];
+      setElementsState(nextElements);
       setSelectedId(null);
+      if (socket) {
+        socket.emit('sync-canvas', { room: activeRoom, elements: nextElements });
+      }
     }
-  }, [history, historyIndex]);
+  }, [history, historyIndex, socket, activeRoom]);
 
   const redo = useCallback(() => {
     if (historyIndex < history.length - 1) {
       const nextIndex = historyIndex + 1;
       setHistoryIndex(nextIndex);
-      setElementsState(history[nextIndex]);
+      const nextElements = history[nextIndex];
+      setElementsState(nextElements);
       setSelectedId(null);
+      if (socket) {
+        socket.emit('sync-canvas', { room: activeRoom, elements: nextElements });
+      }
     }
-  }, [history, historyIndex]);
+  }, [history, historyIndex, socket, activeRoom]);
 
   const clearCanvas = useCallback(() => {
-    setElements([]);
+    setElementsState([]);
     setSelectedId(null);
-  }, [setElements]);
+    if (socket) {
+      socket.emit('sync-canvas', { room: activeRoom, elements: [] });
+    }
+  }, [socket, activeRoom]);
 
   // Object manipulations
   const deleteSelected = useCallback(() => {

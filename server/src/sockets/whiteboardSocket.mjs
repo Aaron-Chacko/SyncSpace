@@ -37,6 +37,14 @@ export default function whiteboardSocketHandler(io, socket, getJoinedRoom, canEd
     socket.to(roomCode).emit("delete-elements", data.ids);
   });
 
+  // sync-canvas: override room canvas state completely and relay it (for undo/redo/major syncs)
+  socket.on("sync-canvas", (data = {}) => {
+    const roomCode = getJoinedRoom(data.room);
+    if (!roomCode || !canEdit(roomCode) || !Array.isArray(data.elements)) return;
+    roomCanvases.set(roomCode, data.elements);
+    socket.to(roomCode).emit("canvas-state", data.elements);
+  });
+
   // draw-in-progress: relay live strokes to other users (not stored)
   socket.on("draw-in-progress", (data = {}) => {
     const roomCode = getJoinedRoom(data.room);
