@@ -3,7 +3,8 @@ import {
   Code2, 
   Layout, 
   PenTool, 
-  Share2, 
+  Copy,
+  Check,
   FileCode,
   Sparkles
 } from "lucide-react";
@@ -14,6 +15,8 @@ const RoomHeaderBar = ({
   viewMode = "split",
   onSetViewMode = () => {},
   roomUsers = [],
+  roomId = "",
+  copied = false,
   onShare = () => {},
 }) => {
   // Extract user initials for avatar stack
@@ -79,7 +82,7 @@ const RoomHeaderBar = ({
         </div>
       </div>
 
-      {/* RIGHT: CONNECTION BADGE, AVATARS STACK, SHARE BUTTON */}
+      {/* RIGHT: CONNECTION BADGE, AVATARS STACK, ROOM CODE + COPY */}
       <div className="header-right-group">
         {/* Connection Status Badge */}
         <div className="connection-latency-badge">
@@ -109,16 +112,29 @@ const RoomHeaderBar = ({
           )}
         </div>
 
-        {/* Share Button */}
-        <button
-          type="button"
-          className="header-share-btn"
-          onClick={onShare}
-          title="Share Room & Code"
-        >
-          <Share2 size={14} />
-          <span>Share</span>
-        </button>
+        {/* Room Code Display with Copy */}
+        <div className="header-room-code-group">
+          <span className="header-room-code-label">Room:</span>
+          <span className="header-room-code-value">{roomId}</span>
+          <button
+            type="button"
+            className={`header-copy-code-btn ${copied ? "copied" : ""}`}
+            onClick={onShare}
+            title="Copy Room Code"
+          >
+            {copied ? (
+              <>
+                <Check size={13} />
+                <span>Copied!</span>
+              </>
+            ) : (
+              <>
+                <Copy size={13} />
+                <span>Copy</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </header>
   );

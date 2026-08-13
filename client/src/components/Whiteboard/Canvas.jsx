@@ -919,32 +919,51 @@ useEffect(() => {
           />
 
           {/* Live Multiplayer Cursors */}
-          {Object.entries(remoteCursors).map(([id, cursor]) => (
-            <Group key={id} x={cursor.x} y={cursor.y}>
-              <Path
-                data="M0,0 L0,15 L4,11 L8,18 L11,17 L7,10 L13,10 Z"
-                fill={cursor.color || '#06b6d4'}
-                stroke="#ffffff"
-                strokeWidth={1}
-              />
-              <Rect
-                x={12}
-                y={12}
-                width={(cursor.name || 'User').length * 7 + 10}
-                height={18}
-                fill={cursor.color || '#06b6d4'}
-                cornerRadius={4}
-              />
-              <Text
-                x={16}
-                y={16}
-                text={cursor.name || 'User'}
-                fill="#ffffff"
-                fontSize={11}
-                fontStyle="bold"
-              />
-            </Group>
-          ))}
+          {Object.entries(remoteCursors).map(([id, cursor]) => {
+            const cursorAccent = cursor.color || '#06b6d4';
+            const labelText = cursor.name || 'User';
+            const labelWidth = labelText.length * 7 + 16;
+            return (
+              <Group key={id} x={cursor.x} y={cursor.y}>
+                <Path
+                  data="M0,0 L0,15 L4,11 L8,18 L11,17 L7,10 L13,10 Z"
+                  fill={cursorAccent}
+                  stroke="#ffffff"
+                  strokeWidth={1}
+                />
+                {/* Label background - dark pill with accent border */}
+                <Rect
+                  x={12}
+                  y={12}
+                  width={labelWidth}
+                  height={20}
+                  fill="#1a1c26"
+                  stroke={cursorAccent}
+                  strokeWidth={1}
+                  cornerRadius={5}
+                  shadowColor="#000000"
+                  shadowBlur={6}
+                  shadowOpacity={0.4}
+                />
+                {/* Accent dot indicator */}
+                <Circle
+                  x={21}
+                  y={22}
+                  radius={3}
+                  fill={cursorAccent}
+                />
+                <Text
+                  x={27}
+                  y={16}
+                  text={labelText}
+                  fill="#ffffff"
+                  fontSize={11}
+                  fontStyle="bold"
+                  fontFamily="Inter, system-ui, sans-serif"
+                />
+              </Group>
+            );
+          })}
         </Layer>
       </Stage>
     </div>
