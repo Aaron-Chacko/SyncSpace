@@ -12,6 +12,7 @@ const TEMP_DIR = path.join(__dirname, "temp");
 if (!fs.existsSync(TEMP_DIR)) {
   fs.mkdirSync(TEMP_DIR, { recursive: true });
 }
+import mongoose from "mongoose";
 import authRoutes from "./routes/authRoutes.js";
 import roomRoutes from "./routes/roomRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
@@ -29,6 +30,17 @@ app.use(express.json());
 
 // Parse URL-encoded form data
 app.use(express.urlencoded({ extended: true }));
+
+// DB Readiness Check Middleware for API routes (except /api/execute)
+app.use("/api", (req, res, next) => {
+  if (req.path === "/execute") return next();
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      message: "Database Unavailable: MongoDB is not connected on the server. Please start your local MongoDB service or update MONGO_URI in server/.env",
+    });
+  }
+  next();
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/rooms", roomRoutes);

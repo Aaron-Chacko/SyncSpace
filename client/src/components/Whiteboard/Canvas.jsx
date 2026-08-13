@@ -103,11 +103,17 @@ useEffect(() => {
   };
 
   const handleDrawElement = (remoteEl) => {
-    setElementsRaw((prev) => [...prev, remoteEl]);
+    setElementsRaw((prev) => {
+      if (prev.some((el) => el.id === remoteEl.id)) return prev;
+      return [...prev, remoteEl];
+    });
     // Clear in-progress for this element when finalized
     setRemoteInProgress((prev) => {
       const next = { ...prev };
-      delete next[remoteEl.id];
+      const keyToDelete = Object.keys(next).find((key) => next[key]?.id === remoteEl.id);
+      if (keyToDelete) {
+        delete next[keyToDelete];
+      }
       return next;
     });
   };
@@ -285,13 +291,16 @@ useEffect(() => {
 
     if (tool === 'eraser') {
       setIsDrawing(true);
-      const hit = findElementAtPosition(pointGrid.x, pointGrid.y, elements);
-      if (hit) {
-        setElements(elements.filter((el) => el.id !== hit.id));
-        if (socket) {
-          socket.emit('delete-elements', { room: activeRoom, ids: [hit.id] });
+      setElements((prev) => {
+        const hit = findElementAtPosition(pointGrid.x, pointGrid.y, prev);
+        if (hit) {
+          if (socket) {
+            socket.emit('delete-elements', { room: activeRoom, ids: [hit.id] });
+          }
+          return prev.filter((el) => el.id !== hit.id);
         }
-      }
+        return prev;
+      });
       return;
     }
 
@@ -303,7 +312,7 @@ useEffect(() => {
         id: elementId,
         type: 'line',
         points: [pointGrid.x, pointGrid.y],
-        color: tool === 'eraser' ? '#1a1c26' : color,
+        color,
         strokeWidth: strokeWidth / stageScale,
         opacity,
         tool
@@ -387,13 +396,16 @@ useEffect(() => {
 
     if (tool === 'eraser') {
       if (isDrawing) {
-        const hit = findElementAtPosition(pointGrid.x, pointGrid.y, elements);
-        if (hit) {
-          setElements(elements.filter((el) => el.id !== hit.id));
-          if (socket) {
-            socket.emit('delete-elements', { room: activeRoom, ids: [hit.id] });
+        setElements((prev) => {
+          const hit = findElementAtPosition(pointGrid.x, pointGrid.y, prev);
+          if (hit) {
+            if (socket) {
+              socket.emit('delete-elements', { room: activeRoom, ids: [hit.id] });
+            }
+            return prev.filter((el) => el.id !== hit.id);
           }
-        }
+          return prev;
+        });
       }
       return;
     }

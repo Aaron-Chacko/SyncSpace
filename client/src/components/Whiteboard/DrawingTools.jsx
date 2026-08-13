@@ -99,13 +99,15 @@ const DrawingTools = ({ isHost = false, canEdit = false }) => {
           </button>
         </>
       )}
-      <button
-        title="Eraser"
-        className={tool === 'eraser' ? 'active' : ''}
-        onClick={() => handleSelectTool('eraser')}
-      >
-        <Eraser size={18} />
-      </button>
+      {isHost && (
+        <button
+          title="Eraser"
+          className={tool === 'eraser' ? 'active' : ''}
+          onClick={() => handleSelectTool('eraser')}
+        >
+          <Eraser size={18} />
+        </button>
+      )}
     </div>
   );
 };
