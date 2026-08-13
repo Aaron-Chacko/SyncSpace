@@ -187,7 +187,7 @@ const Room = () => {
                 </div>
 
                 <div className="panel-content-stage">
-                  <Canvas canEdit={access.canEdit} />
+                  <Canvas canEdit={access.canEdit} isHost={access.isHost} />
 
                   {/* Bottom Canvas Controls Bar */}
                   <div className="canvas-bottom-controls-bar">

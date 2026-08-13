@@ -7,6 +7,8 @@ import Room from "../models/Room.js";
 import User from "../models/User.js";
 
 const roomUsers = new Map();
+// Persist whiteboard canvas state per room (survives user disconnects while room has members)
+const roomCanvases = new Map();
 
 const normalizeRoomCode = (roomCode) => {
   if (typeof roomCode !== "string") return null;
@@ -70,7 +72,11 @@ export function initializeSocket(server) {
         roomCode,
       });
 
-      if (users.size === 0) roomUsers.delete(roomCode);
+      if (users.size === 0) {
+        roomUsers.delete(roomCode);
+        // Keep canvas state alive until the last user leaves — then clear it too
+        roomCanvases.delete(roomCode);
+      }
 
       io.to(roomCode).emit(
         SOCKET_EVENTS.ROOM_USERS,
@@ -128,11 +134,12 @@ export function initializeSocket(server) {
         const isHost =
           room.creator.toString() === socket.user.id;
 
+        // Host always gets edit access; other users need to be in editors list
         const canEditRoom =
           isHost ||
-          (room.editors ?? []).some(
+          ((room.editors ?? []).some(
             (editor) => editor.toString() === socket.user.id
-          );
+          ));
 
         socket.join(roomCode);
 
@@ -167,6 +174,12 @@ export function initializeSocket(server) {
         );
 
         console.log(`🏠 ${socket.user.name} joined room ${roomCode}`);
+
+        // Send existing canvas state to the newly joined user
+        const existingCanvas = roomCanvases.get(roomCode) || [];
+        if (existingCanvas.length > 0) {
+          socket.emit("canvas-state", existingCanvas);
+        }
 
         acknowledgement?.({
           ok: true,
@@ -296,7 +309,7 @@ export function initializeSocket(server) {
       }
     );
 
-    whiteboardSocketHandler(io, socket, getJoinedRoom, canEdit);
+    whiteboardSocketHandler(io, socket, getJoinedRoom, canEdit, roomCanvases);
     editorSocketHandler(io, socket, getJoinedRoom, canEdit);
 
     socket.on("disconnecting", () => {

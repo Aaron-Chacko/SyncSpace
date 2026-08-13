@@ -35,7 +35,7 @@ const URLImage = ({ imageEl }) => {
   );
 };
 
-const Canvas = ({ canEdit = false }) => {
+const Canvas = ({ canEdit = false, isHost = false }) => {
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
   const transformerRef = useRef(null);
@@ -51,6 +51,7 @@ const Canvas = ({ canEdit = false }) => {
   const [stickyInput, setStickyInput] = useState(null);
   const [stickyVal, setStickyVal] = useState('');
   const [remoteCursors, setRemoteCursors] = useState({});
+  const [remoteInProgress, setRemoteInProgress] = useState({});
 
   const {
     tool,
@@ -90,12 +91,36 @@ const Canvas = ({ canEdit = false }) => {
     }
   }, [selectedId, elements]);
 
-  // Socket event listeners
+// Socket event listeners
 useEffect(() => {
   if (!socket) return;
 
+  // Load persisted canvas state when joining/refreshing the room
+  const handleCanvasState = (serverElements) => {
+    if (Array.isArray(serverElements) && serverElements.length > 0) {
+      setElementsRaw(serverElements);
+    }
+  };
+
   const handleDrawElement = (remoteEl) => {
-    setElementsRaw((prev) => [...prev, remoteEl]);
+    setElementsRaw((prev) => {
+      if (prev.some((el) => el.id === remoteEl.id)) return prev;
+      return [...prev, remoteEl];
+    });
+    // Clear in-progress for this element when finalized
+    setRemoteInProgress((prev) => {
+      const next = { ...prev };
+      const keyToDelete = Object.keys(next).find((key) => next[key]?.id === remoteEl.id);
+      if (keyToDelete) {
+        delete next[keyToDelete];
+      }
+      return next;
+    });
+  };
+
+  const handleDeleteElements = (ids) => {
+    if (!Array.isArray(ids)) return;
+    setElementsRaw((prev) => prev.filter((el) => !ids.includes(el.id)));
   };
 
   const handleUpdateElement = (updatedEl) => {
@@ -107,11 +132,11 @@ useEffect(() => {
   const handleClearCanvas = () => {
     setElementsRaw([]);
     setSelectedId(null);
+    setRemoteInProgress({});
   };
 
   const handleCursorMove = (data) => {
     if (data.socketId === socket.id) return;
-
     setRemoteCursors((prev) => ({
       ...prev,
       [data.socketId]: data,
@@ -124,22 +149,43 @@ useEffect(() => {
       delete next[data.socketId];
       return next;
     });
+    setRemoteInProgress((prev) => {
+      const next = { ...prev };
+      delete next[data.socketId];
+      return next;
+    });
   };
 
+  // Live drawing in-progress from other users
+  const handleDrawInProgress = (data) => {
+    if (!data?.socketId || !data?.element) return;
+    setRemoteInProgress((prev) => ({
+      ...prev,
+      [data.socketId]: data.element,
+    }));
+  };
+
+  socket.on("canvas-state", handleCanvasState);
   socket.on("draw-element", handleDrawElement);
+  socket.on("delete-elements", handleDeleteElements);
   socket.on("update-element", handleUpdateElement);
   socket.on("clear-canvas", handleClearCanvas);
   socket.on("cursor-move", handleCursorMove);
   socket.on("cursor-leave", handleCursorLeave);
+  socket.on("draw-in-progress", handleDrawInProgress);
 
   return () => {
+    socket.off("canvas-state", handleCanvasState);
     socket.off("draw-element", handleDrawElement);
+    socket.off("delete-elements", handleDeleteElements);
     socket.off("update-element", handleUpdateElement);
     socket.off("clear-canvas", handleClearCanvas);
     socket.off("cursor-move", handleCursorMove);
     socket.off("cursor-leave", handleCursorLeave);
+    socket.off("draw-in-progress", handleDrawInProgress);
   };
 }, [socket, setElementsRaw, setSelectedId]);
+
 
   // Resize observer
   useEffect(() => {
@@ -243,15 +289,30 @@ useEffect(() => {
       return;
     }
 
+    if (tool === 'eraser') {
+      setIsDrawing(true);
+      setElements((prev) => {
+        const hit = findElementAtPosition(pointGrid.x, pointGrid.y, prev);
+        if (hit) {
+          if (socket) {
+            socket.emit('delete-elements', { room: activeRoom, ids: [hit.id] });
+          }
+          return prev.filter((el) => el.id !== hit.id);
+        }
+        return prev;
+      });
+      return;
+    }
+
     setIsDrawing(true);
     const elementId = 'el_' + Date.now().toString() + Math.random().toString(36).substring(2, 5);
 
-    if (tool === 'pencil' || tool === 'eraser') {
+    if (tool === 'pencil') {
       setNewElement({
         id: elementId,
         type: 'line',
         points: [pointGrid.x, pointGrid.y],
-        color: tool === 'eraser' ? '#1a1c26' : color,
+        color,
         strokeWidth: strokeWidth / stageScale,
         opacity,
         tool
@@ -333,42 +394,122 @@ useEffect(() => {
       });
     }
 
+    if (tool === 'eraser') {
+      if (isDrawing) {
+        setElements((prev) => {
+          const hit = findElementAtPosition(pointGrid.x, pointGrid.y, prev);
+          if (hit) {
+            if (socket) {
+              socket.emit('delete-elements', { room: activeRoom, ids: [hit.id] });
+            }
+            return prev.filter((el) => el.id !== hit.id);
+          }
+          return prev;
+        });
+      }
+      return;
+    }
+
     if (!isDrawing || !newElement) return;
 
+    let updatedElement = newElement;
+
     if (newElement.type === 'line') {
-      setNewElement({
+      updatedElement = {
         ...newElement,
         points: [...newElement.points, pointGrid.x, pointGrid.y]
-      });
+      };
     } else if (newElement.type === 'rect') {
-      setNewElement({
+      updatedElement = {
         ...newElement,
         width: pointGrid.x - newElement.x,
         height: pointGrid.y - newElement.y
-      });
+      };
     } else if (newElement.type === 'circle') {
       const radius = Math.sqrt(
         Math.pow(pointGrid.x - newElement.x, 2) + Math.pow(pointGrid.y - newElement.y, 2)
       );
-      setNewElement({ ...newElement, radius });
+      updatedElement = { ...newElement, radius };
     } else if (newElement.type === 'ellipse') {
-      setNewElement({
+      updatedElement = {
         ...newElement,
         radiusX: Math.abs(pointGrid.x - newElement.x),
         radiusY: Math.abs(pointGrid.y - newElement.y)
-      });
+      };
     } else if (newElement.type === 'straight-line') {
-      setNewElement({
+      updatedElement = {
         ...newElement,
         x2: pointGrid.x,
         y2: pointGrid.y
-      });
+      };
     } else if (newElement.type === 'arrow') {
-      setNewElement({
+      updatedElement = {
         ...newElement,
         points: [newElement.points[0], newElement.points[1], pointGrid.x, pointGrid.y]
+      };
+    }
+
+    setNewElement(updatedElement);
+
+    // Broadcast in-progress drawing to other users so they see it live
+    if (socket) {
+      socket.emit('draw-in-progress', {
+        room: activeRoom,
+        element: updatedElement
       });
     }
+  };
+
+  // Helper: check if a point is near any point in a polyline (eraser hit test)
+  const pointNearPolyline = (px, py, points, threshold) => {
+    if (!points || points.length < 2) return false;
+    for (let i = 0; i < points.length - 2; i += 2) {
+      const ax = points[i], ay = points[i + 1];
+      const bx = points[i + 2], by = points[i + 3];
+      const dx = bx - ax, dy = by - ay;
+      const lenSq = dx * dx + dy * dy;
+      let t = lenSq > 0 ? ((px - ax) * dx + (py - ay) * dy) / lenSq : 0;
+      t = Math.max(0, Math.min(1, t));
+      const nearX = ax + t * dx, nearY = ay + t * dy;
+      if (Math.hypot(px - nearX, py - nearY) <= threshold) return true;
+    }
+    return false;
+  };
+
+  // Helper: find element at pointer position
+  const findElementAtPosition = (x, y, elements, threshold = 15) => {
+    // Search in reverse order to check top-most elements first
+    for (let i = elements.length - 1; i >= 0; i--) {
+      const el = elements[i];
+      if (el.type === 'line' || el.type === 'straight-line' || el.type === 'arrow') {
+        const pts = el.points || [el.x1, el.y1, el.x2, el.y2];
+        if (pointNearPolyline(x, y, pts, threshold + (el.strokeWidth || 4))) {
+          return el;
+        }
+      } else if (el.type === 'rect') {
+        if (x >= el.x && x <= el.x + (el.width || 0) &&
+            y >= el.y && y <= el.y + (el.height || 0)) {
+          return el;
+        }
+      } else if (el.type === 'circle') {
+        const dist = Math.hypot(x - el.x, y - el.y);
+        if (dist <= (el.radius || 0) + threshold) {
+          return el;
+        }
+      } else if (el.type === 'ellipse') {
+        const rx = el.radiusX || 0, ry = el.radiusY || 0;
+        if (((x - el.x) ** 2) / ((rx + threshold) ** 2) + ((y - el.y) ** 2) / ((ry + threshold) ** 2) <= 1) {
+          return el;
+        }
+      } else if (el.type === 'text' || el.type === 'sticky' || el.type === 'image') {
+        const w = el.width || 120, h = el.height || 80;
+        if (x >= el.x && x <= el.x + w &&
+            y >= el.y && y <= el.y + h) {
+          return el;
+        }
+      }
+    }
+    return null;
   };
 
   const handleMouseUp = () => {
@@ -376,6 +517,11 @@ useEffect(() => {
     setIsDrawing(false);
 
     if (newElement) {
+      if (newElement.tool === 'eraser') {
+        setNewElement(null);
+        return;
+      }
+
       if (
         (newElement.type === 'line' && newElement.points.length >= 2) ||
         (newElement.type === 'rect' && Math.abs(newElement.width) > 1 && Math.abs(newElement.height) > 1) ||
@@ -395,6 +541,7 @@ useEffect(() => {
       setNewElement(null);
     }
   };
+
 
   const handleTextSubmit = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -550,7 +697,7 @@ useEffect(() => {
 
   return (
     <div className={`canvas-container ${tool === 'pan' ? 'pan-mode' : ''}`} ref={containerRef}>
-      <Toolbar />
+      <Toolbar isHost={isHost} canEdit={canEdit} />
 
       {/* Hidden File Input for Image Tool */}
       <input
@@ -963,6 +1110,27 @@ useEffect(() => {
                 />
               </Group>
             );
+          })}
+        </Layer>
+
+        {/* Remote In-Progress Drawing Layer */}
+        <Layer>
+          {Object.values(remoteInProgress).map((el) => {
+            if (!el) return null;
+            if (el.type === 'line') {
+              return <Line key={el.id} points={el.points} stroke={el.color} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} tension={0.5} lineCap="round" lineJoin="round" globalCompositeOperation={el.tool === 'eraser' ? 'destination-out' : 'source-over'} />;
+            } else if (el.type === 'rect') {
+              return <Rect key={el.id} x={el.x} y={el.y} width={el.width} height={el.height} stroke={el.color} fill={el.fillColor !== 'transparent' ? el.fillColor : undefined} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} />;
+            } else if (el.type === 'circle') {
+              return <Circle key={el.id} x={el.x} y={el.y} radius={el.radius} stroke={el.color} fill={el.fillColor !== 'transparent' ? el.fillColor : undefined} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} />;
+            } else if (el.type === 'ellipse') {
+              return <Ellipse key={el.id} x={el.x} y={el.y} radiusX={el.radiusX} radiusY={el.radiusY} stroke={el.color} fill={el.fillColor !== 'transparent' ? el.fillColor : undefined} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} />;
+            } else if (el.type === 'straight-line') {
+              return <Line key={el.id} points={[el.x1, el.y1, el.x2, el.y2]} stroke={el.color} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} lineCap="round" />;
+            } else if (el.type === 'arrow') {
+              return <Arrow key={el.id} points={el.points} stroke={el.color} fill={el.color} strokeWidth={el.strokeWidth} opacity={(el.opacity || 1) * 0.8} pointerLength={10} pointerWidth={10} />;
+            }
+            return null;
           })}
         </Layer>
       </Stage>
