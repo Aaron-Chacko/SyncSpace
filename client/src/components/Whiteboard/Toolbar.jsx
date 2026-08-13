@@ -37,7 +37,7 @@ const Toolbar = () => {
     setStagePos
   } = useWhiteboard();
 
-  const strokePresets = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ffffff'];
+  const strokePresets = ['#ffffff', '#449D8F', '#9A9B45', '#2F4F4B', '#ef4444', '#f59e0b'];
 
   const handleZoomIn = () => {
     setStageScale((prev) => Math.min(10, prev * 1.15));
