@@ -95,6 +95,13 @@ const Canvas = ({ canEdit = false }) => {
 useEffect(() => {
   if (!socket) return;
 
+  // Load persisted canvas state when joining/refreshing the room
+  const handleCanvasState = (serverElements) => {
+    if (Array.isArray(serverElements) && serverElements.length > 0) {
+      setElementsRaw(serverElements);
+    }
+  };
+
   const handleDrawElement = (remoteEl) => {
     setElementsRaw((prev) => [...prev, remoteEl]);
     // Clear in-progress for this element when finalized
@@ -103,6 +110,11 @@ useEffect(() => {
       delete next[remoteEl.id];
       return next;
     });
+  };
+
+  const handleDeleteElements = (ids) => {
+    if (!Array.isArray(ids)) return;
+    setElementsRaw((prev) => prev.filter((el) => !ids.includes(el.id)));
   };
 
   const handleUpdateElement = (updatedEl) => {
@@ -147,7 +159,9 @@ useEffect(() => {
     }));
   };
 
+  socket.on("canvas-state", handleCanvasState);
   socket.on("draw-element", handleDrawElement);
+  socket.on("delete-elements", handleDeleteElements);
   socket.on("update-element", handleUpdateElement);
   socket.on("clear-canvas", handleClearCanvas);
   socket.on("cursor-move", handleCursorMove);
@@ -155,7 +169,9 @@ useEffect(() => {
   socket.on("draw-in-progress", handleDrawInProgress);
 
   return () => {
+    socket.off("canvas-state", handleCanvasState);
     socket.off("draw-element", handleDrawElement);
+    socket.off("delete-elements", handleDeleteElements);
     socket.off("update-element", handleUpdateElement);
     socket.off("clear-canvas", handleClearCanvas);
     socket.off("cursor-move", handleCursorMove);
@@ -163,6 +179,7 @@ useEffect(() => {
     socket.off("draw-in-progress", handleDrawInProgress);
   };
 }, [socket, setElementsRaw, setSelectedId]);
+
 
   // Resize observer
   useEffect(() => {
@@ -406,11 +423,73 @@ useEffect(() => {
     }
   };
 
+  // Helper: check if a point is near any point in a polyline (eraser hit test)
+  const pointNearPolyline = (px, py, points, threshold) => {
+    for (let i = 0; i < points.length - 2; i += 2) {
+      const ax = points[i], ay = points[i + 1];
+      const bx = points[i + 2], by = points[i + 3];
+      const dx = bx - ax, dy = by - ay;
+      const lenSq = dx * dx + dy * dy;
+      let t = lenSq > 0 ? ((px - ax) * dx + (py - ay) * dy) / lenSq : 0;
+      t = Math.max(0, Math.min(1, t));
+      const nearX = ax + t * dx, nearY = ay + t * dy;
+      if (Math.hypot(px - nearX, py - nearY) <= threshold) return true;
+    }
+    return false;
+  };
+
+  // Helper: check if eraser path intersects with an element's bounding area
+  const eraserHitsElement = (eraserEl, el) => {
+    if (!eraserEl?.points?.length) return false;
+    const threshold = (eraserEl.strokeWidth || 10) * 2;
+    const pts = eraserEl.points;
+
+    // Sample eraser points and check proximity to element center/points
+    for (let i = 0; i < pts.length - 1; i += 2) {
+      const ex = pts[i], ey = pts[i + 1];
+
+      if (el.type === 'line' && el.points?.length) {
+        if (pointNearPolyline(ex, ey, el.points, threshold)) return true;
+      } else if (el.type === 'rect') {
+        if (ex >= el.x - threshold && ex <= el.x + (el.width || 0) + threshold &&
+            ey >= el.y - threshold && ey <= el.y + (el.height || 0) + threshold) return true;
+      } else if (el.type === 'circle') {
+        if (Math.hypot(ex - el.x, ey - el.y) <= (el.radius || 0) + threshold) return true;
+      } else if (el.type === 'ellipse') {
+        const rx = (el.radiusX || 0) + threshold, ry = (el.radiusY || 0) + threshold;
+        if (((ex - el.x) ** 2) / (rx * rx) + ((ey - el.y) ** 2) / (ry * ry) <= 1) return true;
+      } else if (el.type === 'straight-line') {
+        if (pointNearPolyline(ex, ey, [el.x1, el.y1, el.x2, el.y2], threshold)) return true;
+      } else if (el.type === 'arrow') {
+        if (el.points?.length && pointNearPolyline(ex, ey, el.points, threshold)) return true;
+      } else if (el.type === 'text' || el.type === 'sticky' || el.type === 'image') {
+        const w = el.width || 100, h = el.height || 40;
+        if (ex >= el.x - threshold && ex <= el.x + w + threshold &&
+            ey >= el.y - threshold && ey <= el.y + h + threshold) return true;
+      }
+    }
+    return false;
+  };
+
   const handleMouseUp = () => {
     if (!isDrawing) return;
     setIsDrawing(false);
 
     if (newElement) {
+      // ERASER: delete all elements that the eraser stroke touches
+      if (newElement.tool === 'eraser') {
+        const toDelete = elements.filter((el) => eraserHitsElement(newElement, el));
+        if (toDelete.length > 0) {
+          const deleteIds = toDelete.map((el) => el.id);
+          setElements(elements.filter((el) => !deleteIds.includes(el.id)));
+          if (socket) {
+            socket.emit('delete-elements', { room: activeRoom, ids: deleteIds });
+          }
+        }
+        setNewElement(null);
+        return;
+      }
+
       if (
         (newElement.type === 'line' && newElement.points.length >= 2) ||
         (newElement.type === 'rect' && Math.abs(newElement.width) > 1 && Math.abs(newElement.height) > 1) ||
@@ -430,6 +509,7 @@ useEffect(() => {
       setNewElement(null);
     }
   };
+
 
   const handleTextSubmit = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
