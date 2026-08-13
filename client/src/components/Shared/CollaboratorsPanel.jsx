@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { 
-  UserPlus, 
   Info,
 } from "lucide-react";
 
@@ -8,7 +7,7 @@ const CollaboratorsPanel = ({
   roomUsers = [],
   isHost = false,
   canEdit = false,
-  onInvite = () => {},
+  onInvite,
   activeFile = "server.js",
   onGrantAccess = () => {},
   pendingRequests = [],
@@ -108,10 +107,13 @@ const CollaboratorsPanel = ({
                     <span>{req.name || "User"}</span>
                     <button
                       type="button"
-                      className="approve-btn"
+                      className="themed-approve-btn"
                       onClick={() => onGrantAccess(req.userId, true)}
                     >
-                      Approve
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <span>Approve</span>
                     </button>
                   </div>
                 ))}
@@ -121,30 +123,32 @@ const CollaboratorsPanel = ({
             {/* Request Edit Access for Viewers */}
             {!isHost && !canEdit && (
               <div className="sidebar-request-card">
+                <div className="request-card-icon-row">
+                  <div className="request-icon-badge">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+                    </svg>
+                  </div>
+                  <span className="request-card-title">View-Only Mode</span>
+                </div>
+                <p className="request-card-desc">You're currently viewing. Request edit access to collaborate.</p>
                 <button
                   type="button"
-                  className="request-edit-btn"
+                  className="request-edit-access-btn"
                   onClick={onRequestEditAccess}
                 >
-                  Request Edit Access
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="16" r="1" />
+                    <rect x="3" y="10" width="18" height="12" rx="2" ry="2" />
+                    <path d="M7 10V7a5 5 0 0 1 10 0v3" />
+                  </svg>
+                  <span>Request Edit Access</span>
                 </button>
                 {requestMessage && (
                   <span className="request-msg-text">{requestMessage}</span>
                 )}
               </div>
             )}
-
-            {/* INVITE COLLABORATOR ACTION BUTTON */}
-            <div className="invite-collaborator-wrapper">
-              <button
-                type="button"
-                className="invite-collaborator-btn"
-                onClick={onInvite}
-              >
-                <UserPlus size={15} />
-                <span>+ Invite collaborator</span>
-              </button>
-            </div>
           </div>
         )}
 

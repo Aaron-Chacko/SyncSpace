@@ -2516,25 +2516,64 @@ a:focus-visible {
   font-size: 0.65rem;
 }
 
-.header-share-btn {
+.header-room-code-group {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 7px;
-  background: #1f202a;
+  gap: 0;
+  background: #181920;
   border: 1px solid #2a2b36;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 32px;
+}
+
+.header-room-code-label {
+  padding: 0 8px 0 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6b6e7f;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.header-room-code-value {
+  padding: 0 10px 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: #ffffff;
-  font-size: 0.8rem;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  user-select: all;
+}
+
+.header-copy-code-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 12px;
+  height: 100%;
+  background: #242632;
+  border: none;
+  border-left: 1px solid #2a2b36;
+  color: #a0a3b1;
+  font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.header-share-btn:hover {
-  background: #282a38;
-  border-color: #ffffff;
+.header-copy-code-btn:hover {
+  background: #2d2f3e;
   color: #ffffff;
+}
+
+.header-copy-code-btn.copied {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border-left-color: rgba(16, 185, 129, 0.3);
 }
 
 /* --- Main 3-Column Body Layout --- */
@@ -3106,31 +3145,144 @@ a:focus-visible {
   cursor: pointer;
 }
 
-.invite-collaborator-wrapper {
-  margin-top: 10px;
+/* --- Request Edit Access Themed Card --- */
+.sidebar-request-card {
+  background: linear-gradient(135deg, #14151a 0%, #181920 100%);
+  border: 1px solid #2a2b36;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.invite-collaborator-btn {
+.request-card-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.request-icon-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid #2a2b36;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a0a3b1;
+  flex-shrink: 0;
+}
+
+.request-card-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #d0d3dc;
+}
+
+.request-card-desc {
+  font-size: 0.74rem;
+  color: #6b6e7f;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.request-edit-access-btn {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px;
+  padding: 9px 14px;
   border-radius: 8px;
-  background: transparent;
-  border: 1px dashed #2a2b36;
-  color: #d0d3dc;
-  font-size: 0.82rem;
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid #3b3d4f;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
-.invite-collaborator-btn:hover {
-  background: #181922;
+.request-edit-access-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
   border-color: #ffffff;
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.request-edit-access-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.request-msg-text {
+  font-size: 0.74rem;
+  color: #10b981;
+  text-align: center;
+  padding-top: 2px;
+}
+
+/* --- Access Requests Pending Card & Approve Button --- */
+.sidebar-pending-card {
+  background: rgba(239, 68, 68, 0.04);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pending-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fca5a5;
+  letter-spacing: 0.02em;
+}
+
+.pending-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pending-row span {
+  font-size: 0.82rem;
+  font-weight: 600;
   color: #ffffff;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.themed-approve-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #10b981;
+  border: none;
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.themed-approve-btn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+}
+
+.themed-approve-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 /* Floating Toast Notification */
