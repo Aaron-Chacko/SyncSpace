@@ -35,7 +35,7 @@ const URLImage = ({ imageEl }) => {
   );
 };
 
-const Canvas = ({ canEdit = false }) => {
+const Canvas = ({ canEdit = false, isHost = false }) => {
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
   const transformerRef = useRef(null);
@@ -685,7 +685,7 @@ useEffect(() => {
 
   return (
     <div className={`canvas-container ${tool === 'pan' ? 'pan-mode' : ''}`} ref={containerRef}>
-      <Toolbar />
+      <Toolbar isHost={isHost} canEdit={canEdit} />
 
       {/* Hidden File Input for Image Tool */}
       <input
