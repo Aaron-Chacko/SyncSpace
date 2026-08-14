@@ -12,6 +12,7 @@ const TEMP_DIR = path.join(__dirname, "temp");
 if (!fs.existsSync(TEMP_DIR)) {
   fs.mkdirSync(TEMP_DIR, { recursive: true });
 }
+import mongoose from "mongoose";
 import authRoutes from "./routes/authRoutes.js";
 import roomRoutes from "./routes/roomRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
@@ -29,6 +30,17 @@ app.use(express.json());
 
 // Parse URL-encoded form data
 app.use(express.urlencoded({ extended: true }));
+
+// DB Readiness Check Middleware for API routes (except /api/execute)
+app.use("/api", (req, res, next) => {
+  if (req.path === "/execute") return next();
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      message: "Database Unavailable: MongoDB is not connected on the server. Please start your local MongoDB service or update MONGO_URI in server/.env",
+    });
+  }
+  next();
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/rooms", roomRoutes);
@@ -192,10 +204,38 @@ async function executeLocalCode(language, code, stdin) {
 
 /* -------------------- Code Execution Route -------------------- */
 
-app.post("/api/execute", async (req, res) => {
-  const { language, code, stdin } = req.body;
-  if (!code) {
-    return res.status(400).json({ error: "Code is required" });
+  app.post("/api/execute", async (req, res) => {
+  const { language, code, stdin = "" } = req.body;
+
+  const supportedLanguages = [
+    "javascript",
+    "typescript",
+    "python",
+    "java",
+    "cpp",
+    "c",
+    "go",
+    "rust",
+    "ruby",
+    "php",
+  ];
+
+  if (!language || !supportedLanguages.includes(language)) {
+    return res.status(400).json({
+      error: "Unsupported or missing programming language",
+    });
+  }
+
+  if (typeof code !== "string" || !code.trim()) {
+    return res.status(400).json({
+      error: "Code is required",
+    });
+  }
+
+  if (typeof stdin !== "string") {
+    return res.status(400).json({
+      error: "Input must be a string",
+    });
   }
 
   try {

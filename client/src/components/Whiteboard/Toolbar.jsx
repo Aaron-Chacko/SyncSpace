@@ -6,7 +6,7 @@ import { useSocketContext } from '../../context/SocketContext';
 import DrawingTools from './DrawingTools';
 import './Whiteboard.css';
 
-const Toolbar = () => {
+const Toolbar = ({ isHost = false, canEdit = false }) => {
   const { roomId } = useParams();
   const socket = useSocketContext();
   const activeRoom = roomId || 'default-room';
@@ -37,7 +37,7 @@ const Toolbar = () => {
     setStagePos
   } = useWhiteboard();
 
-  const strokePresets = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ffffff'];
+  const strokePresets = ['#ffffff', '#449D8F', '#9A9B45', '#2F4F4B', '#ef4444', '#f59e0b'];
 
   const handleZoomIn = () => {
     setStageScale((prev) => Math.min(10, prev * 1.15));
@@ -61,7 +61,7 @@ const Toolbar = () => {
 
   return (
     <div className="whiteboard-toolbar">
-      <DrawingTools />
+      <DrawingTools isHost={isHost} canEdit={canEdit} />
       
       <div className="toolbar-divider" />
       
@@ -135,8 +135,8 @@ const Toolbar = () => {
 
       <div className="toolbar-divider" />
 
-      {/* Selected Object Manipulation Controls */}
-      {selectedId && (
+      {/* Selected Object Manipulation Controls (Host Only) */}
+      {selectedId && isHost && (
         <>
           <div className="history-section" title="Object Controls">
             <button onClick={bringToFront} title="Bring to Front" className="icon-button">
@@ -179,22 +179,26 @@ const Toolbar = () => {
 
       {/* History & Action Controls */}
       <div className="history-section">
-        <button
-          onClick={undo}
-          disabled={!canUndo}
-          title="Undo"
-          className="icon-button"
-        >
-          <Undo size={18} />
-        </button>
-        <button
-          onClick={redo}
-          disabled={!canRedo}
-          title="Redo"
-          className="icon-button"
-        >
-          <Redo size={18} />
-        </button>
+        {isHost && (
+          <>
+            <button
+              onClick={undo}
+              disabled={!canUndo}
+              title="Undo"
+              className="icon-button"
+            >
+              <Undo size={18} />
+            </button>
+            <button
+              onClick={redo}
+              disabled={!canRedo}
+              title="Redo"
+              className="icon-button"
+            >
+              <Redo size={18} />
+            </button>
+          </>
+        )}
         <button
           onClick={() => exportAsImage()}
           title="Export Canvas as PNG Image"
@@ -202,13 +206,15 @@ const Toolbar = () => {
         >
           <Download size={18} />
         </button>
-        <button
-          onClick={handleClear}
-          title="Clear Whiteboard"
-          className="icon-button delete-button"
-        >
-          <Trash2 size={18} />
-        </button>
+        {isHost && (
+          <button
+            onClick={handleClear}
+            title="Clear Whiteboard"
+            className="icon-button delete-button"
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
       </div>
     </div>
   );

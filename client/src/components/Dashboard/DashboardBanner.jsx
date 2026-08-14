@@ -1,22 +1,28 @@
-import React from "react";
+import { PlusCircle, Sparkles } from "lucide-react";
 
-const DashboardBanner = () => {
-    return (
-        <div className="dashboard-banner">
-            <div className="banner-content">
-                <h1>👋 Welcome Back</h1>
+const DashboardBanner = ({ onCreateRoom }) => {
+  return (
+    <div className="dashboard-banner">
+      <div className="banner-content">
+        <h1>👋 Welcome Back</h1>
 
-                <p>
-                    Collaborate with your team in real-time.
-                    Create rooms, invite members, and start coding together.
-                </p>
+        <p>
+          Collaborate with your team in real-time.
+          Create rooms, invite members, and start coding together.
+        </p>
 
-                <button className="primary-btn">
-                    + Create New Room
-                </button>
-            </div>
-        </div>
-    );
+        <button
+          type="button"
+          className="rich-primary-btn banner-cta-btn"
+          onClick={onCreateRoom}
+        >
+          <PlusCircle size={18} />
+          <span>Create New Room</span>
+          <Sparkles size={16} className="btn-sparkle" />
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default DashboardBanner;
