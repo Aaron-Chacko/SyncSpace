@@ -26,6 +26,7 @@ const Room = () => {
   const [connectionError, setConnectionError] = useState("");
   const [copied, setCopied] = useState(false);
   const [lastJoined, setLastJoined] = useState(null);
+  const [messages, setMessages] = useState([]);
 
   // New IDE Layout state matching screenshot
   const [viewMode, setViewMode] = useState("split"); // 'whiteboard' | 'split' | 'code'
@@ -97,13 +98,26 @@ const Room = () => {
           request,
         ]);
     };
+    const handleReceiveMessage = (message) => {
+      setMessages((prev) => [...prev, message]);
+    };
+    const handleChatHistory = (history) => {
+      if (Array.isArray(history)) {
+        setMessages(history);
+      }
+    };
+
     socket.on(SOCKET_EVENTS.ACCESS_UPDATED, handleAccessUpdated);
     socket.on(SOCKET_EVENTS.EDIT_ACCESS_REQUESTED, handleAccessRequest);
+    socket.on("receive-message", handleReceiveMessage);
+    socket.on("chat-history", handleChatHistory);
 
     return () => {
       socket.off(SOCKET_EVENTS.ROOM_USERS, handleRoomUsers);
       socket.off(SOCKET_EVENTS.ACCESS_UPDATED, handleAccessUpdated);
       socket.off(SOCKET_EVENTS.EDIT_ACCESS_REQUESTED, handleAccessRequest);
+      socket.off("receive-message", handleReceiveMessage);
+      socket.off("chat-history", handleChatHistory);
       socket.off("connect", joinRoom);
       socket.off("connect_error", handleConnectionError);
       socket.emit(SOCKET_EVENTS.LEAVE_ROOM, roomId);
@@ -133,6 +147,24 @@ const Room = () => {
           );
       }
     );
+  };
+
+  const sendChatMessage = (text) => {
+    if (!socket || !roomId || !text.trim()) return;
+    const message = {
+      id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+      text: text.trim(),
+      senderId: user?.id || "me",
+      senderName: user?.name || "Me",
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setMessages((prev) => [...prev, message]);
+
+    socket.emit("send-message", {
+      room: roomId,
+      text: text.trim(),
+    });
   };
 
   return (
@@ -280,6 +312,8 @@ const Room = () => {
             requestMessage={requestMessage}
             lastJoined={lastJoined}
             currentUser={user}
+            messages={messages}
+            onSendMessage={sendChatMessage}
           />
         </div>
 

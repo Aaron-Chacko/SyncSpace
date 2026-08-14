@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Info,
+  Send
 } from "lucide-react";
 
 const CollaboratorsPanel = ({
@@ -15,10 +16,27 @@ const CollaboratorsPanel = ({
   requestMessage = "",
   lastJoined = null,
   currentUser = null,
+  messages = [],
+  onSendMessage = () => {},
 }) => {
   const [activeTab, setActiveTab] = useState("collaborators");
+  const [chatInput, setChatInput] = useState("");
+  const chatEndRef = useRef(null);
 
-  // Only show real users — no hardcoded fallback
+  // Auto scroll to bottom of chat
+  useEffect(() => {
+    if (activeTab === "chat" && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, activeTab]);
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    onSendMessage(chatInput);
+    setChatInput("");
+  };
+
   const displayUsers = roomUsers;
 
   return (
@@ -44,7 +62,7 @@ const CollaboratorsPanel = ({
           className={`panel-tab-btn ${activeTab === "chat" ? "active" : ""}`}
           onClick={() => setActiveTab("chat")}
         >
-          Chat
+          Chat {messages.length > 0 && `(${messages.length})`}
         </button>
       </div>
 
@@ -168,8 +186,56 @@ const CollaboratorsPanel = ({
         )}
 
         {activeTab === "chat" && (
-          <div className="panel-chat-placeholder">
-            <p>Live session room chat active.</p>
+          <div className="panel-chat-container">
+            <div className="chat-messages-scroll-area">
+              {messages.length === 0 ? (
+                <div className="chat-empty-state">
+                  <p className="chat-empty-title">Session Chat</p>
+                  <p className="chat-empty-desc">Send messages to collaborate with other people in this room.</p>
+                </div>
+              ) : (
+                messages.map((msg) => {
+                  const isMe = msg.senderId === currentUser?.id || msg.senderId === "me";
+                  const initial = (msg.senderName || "U")[0].toUpperCase();
+
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`chat-message-row ${isMe ? "me" : "other"}`}
+                    >
+                      {!isMe && (
+                        <div className="chat-message-avatar">
+                          {initial}
+                        </div>
+                      )}
+                      <div className="chat-message-bubble">
+                        {!isMe && (
+                          <span className="chat-message-sender-name">
+                            {msg.senderName}
+                          </span>
+                        )}
+                        <p className="chat-message-text">{msg.text}</p>
+                        <span className="chat-message-time">{msg.timestamp}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            <form onSubmit={handleSend} className="chat-input-submit-bar">
+              <input
+                type="text"
+                placeholder="Send message..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                maxLength={1000}
+              />
+              <button type="submit" disabled={!chatInput.trim()}>
+                <Send size={14} />
+              </button>
+            </form>
           </div>
         )}
       </div>
