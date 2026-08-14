@@ -9,6 +9,8 @@ import User from "../models/User.js";
 const roomUsers = new Map();
 // Persist whiteboard canvas state per room (survives user disconnects while room has members)
 const roomCanvases = new Map();
+// Persist room chat messages
+const roomChats = new Map();
 
 const normalizeRoomCode = (roomCode) => {
   if (typeof roomCode !== "string") return null;
@@ -16,7 +18,16 @@ const normalizeRoomCode = (roomCode) => {
   return normalized.length > 0 && normalized.length <= 100 ? normalized : null;
 };
 
-const usersInRoom = (roomCode) => [...(roomUsers.get(roomCode) ?? new Map()).values()];
+const usersInRoom = (roomCode) => {
+  const users = roomUsers.get(roomCode);
+  if (!users) return [];
+  // Deduplicate by userId — keep the latest socket entry per user
+  const byUserId = new Map();
+  for (const entry of users.values()) {
+    byUserId.set(entry.userId, entry);
+  }
+  return [...byUserId.values()];
+};
 
 export function initializeSocket(server) {
   const io = new Server(server, {
@@ -76,6 +87,7 @@ export function initializeSocket(server) {
         roomUsers.delete(roomCode);
         // Keep canvas state alive until the last user leaves — then clear it too
         roomCanvases.delete(roomCode);
+        roomChats.delete(roomCode);
       }
 
       io.to(roomCode).emit(
@@ -148,6 +160,13 @@ export function initializeSocket(server) {
 
         const users = roomUsers.get(roomCode);
 
+        // Remove any stale socket entries for the same userId (e.g. from a refresh)
+        for (const [existingSocketId, existingUser] of users.entries()) {
+          if (existingUser.userId === socket.user.id && existingSocketId !== socket.id) {
+            users.delete(existingSocketId);
+          }
+        }
+
         const wasPresent = users.has(socket.id);
 
         users.set(socket.id, {
@@ -179,6 +198,12 @@ export function initializeSocket(server) {
         const existingCanvas = roomCanvases.get(roomCode) || [];
         if (existingCanvas.length > 0) {
           socket.emit("canvas-state", existingCanvas);
+        }
+
+        // Send existing chat history to the newly joined user
+        const existingChat = roomChats.get(roomCode) || [];
+        if (existingChat.length > 0) {
+          socket.emit("chat-history", existingChat);
         }
 
         acknowledgement?.({
@@ -311,6 +336,28 @@ export function initializeSocket(server) {
 
     whiteboardSocketHandler(io, socket, getJoinedRoom, canEdit, roomCanvases);
     editorSocketHandler(io, socket, getJoinedRoom, canEdit);
+
+    // Chat Message Event Handler
+    socket.on("send-message", (data = {}) => {
+      const roomCode = getJoinedRoom(data.room);
+      if (!roomCode || typeof data.text !== "string" || !data.text.trim()) return;
+
+      const message = {
+        id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+        text: data.text.trim().slice(0, 2000),
+        senderId: socket.user.id,
+        senderName: socket.user.name,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+
+      if (!roomChats.has(roomCode)) {
+        roomChats.set(roomCode, []);
+      }
+      roomChats.get(roomCode).push(message);
+
+      // Send to all other users in the room
+      socket.to(roomCode).emit("receive-message", message);
+    });
 
     socket.on("disconnecting", () => {
       for (const roomCode of [...roomUsers.keys()]) {

@@ -5,7 +5,8 @@ import './Whiteboard.css';
 
 const DrawingTools = ({ isHost = false, canEdit = false }) => {
   const { tool, setTool, setSelectedId } = useWhiteboard();
-  const isEditorOnly = !isHost && canEdit;
+  // Viewers = not host AND can't edit
+  const isViewer = !isHost && !canEdit;
 
   const handleSelectTool = (newTool) => {
     setTool(newTool);
@@ -16,7 +17,7 @@ const DrawingTools = ({ isHost = false, canEdit = false }) => {
 
   return (
     <div className="drawing-tools">
-      {!isEditorOnly && (
+      {!isViewer && (
         <button
           title="Selection Tool (Select, Move, Resize)"
           className={tool === 'select' ? 'active' : ''}
@@ -32,7 +33,7 @@ const DrawingTools = ({ isHost = false, canEdit = false }) => {
       >
         <Hand size={18} />
       </button>
-      {!isEditorOnly && (
+      {!isViewer && (
         <>
           <button
             title="Pencil (Freehand)"
@@ -112,4 +113,4 @@ const DrawingTools = ({ isHost = false, canEdit = false }) => {
   );
 };
 
-export default DrawingTools;
+export default DrawingTools;
