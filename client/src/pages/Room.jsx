@@ -34,19 +34,28 @@ const Room = () => {
 
     console.log(`Joining room: ${roomId}`);
 
-    const joinRoom = () => socket.emit(SOCKET_EVENTS.JOIN_ROOM, roomId, (result) => {
-      if (!result?.ok) {
-        setConnectionError(result?.error || "Unable to join this room.");
-        return;
-      }
+    const joinRoom = () => {
       setConnectionError("");
-      setRoomUsers(result.users);
-      setAccess({ isHost: result.isHost, canEdit: result.canEdit });
-    });
+
+      socket.emit(SOCKET_EVENTS.JOIN_ROOM, roomId, (result) => {
+        if (!result?.ok) {
+          setConnectionError(result?.error || "Unable to join this room.");
+          return;
+        }
+
+        setRoomUsers(result.users || []);
+        setAccess({
+          isHost: Boolean(result.isHost),
+          canEdit: Boolean(result.canEdit),
+        });
+      });
+    };
     if (socket.connected) joinRoom();
     socket.on("connect", joinRoom);
     const handleConnectionError = (error) => {
-      setConnectionError(error.message || "Unable to connect to real-time collaboration.");
+      setConnectionError(
+        error.message || "Unable to connect to real-time collaboration.",
+      );
     };
     socket.on("connect_error", handleConnectionError);
 
@@ -56,10 +65,15 @@ const Room = () => {
 
     socket.on(SOCKET_EVENTS.ROOM_USERS, handleRoomUsers);
     const handleAccessUpdated = (update) => {
-      if (update.room === roomId) setAccess((current) => ({ ...current, canEdit: update.canEdit }));
+      if (update.room === roomId)
+        setAccess((current) => ({ ...current, canEdit: update.canEdit }));
     };
     const handleAccessRequest = (request) => {
-      if (request.room === roomId) setAccessRequests((requests) => [...requests.filter((item) => item.userId !== request.userId), request]);
+      if (request.room === roomId)
+        setAccessRequests((requests) => [
+          ...requests.filter((item) => item.userId !== request.userId),
+          request,
+        ]);
     };
     socket.on(SOCKET_EVENTS.ACCESS_UPDATED, handleAccessUpdated);
     socket.on(SOCKET_EVENTS.EDIT_ACCESS_REQUESTED, handleAccessRequest);
@@ -75,17 +89,29 @@ const Room = () => {
   }, [socket, roomId]);
 
   const requestEditAccess = () => {
-    socket.emit(SOCKET_EVENTS.REQUEST_EDIT_ACCESS, { room: roomId }, (result) => {
-      setRequestMessage(result.ok ? "Request sent to the host." : result.error);
-    });
+    socket.emit(
+      SOCKET_EVENTS.REQUEST_EDIT_ACCESS,
+      { room: roomId },
+      (result) => {
+        setRequestMessage(
+          result.ok ? "Request sent to the host." : result.error,
+        );
+      },
+    );
   };
 
   const setParticipantAccess = (userId, allow) => {
-    socket.emit(SOCKET_EVENTS.GRANT_EDIT_ACCESS, { room: roomId, userId, allow }, (result) => {
-      if (result.ok) setAccessRequests((requests) => requests.filter((request) => request.userId !== userId));
-    });
+    socket.emit(
+      SOCKET_EVENTS.GRANT_EDIT_ACCESS,
+      { room: roomId, userId, allow },
+      (result) => {
+        if (result.ok)
+          setAccessRequests((requests) =>
+            requests.filter((request) => request.userId !== userId),
+          );
+      },
+    );
   };
-
 
   return (
     <WhiteboardProvider>
@@ -101,64 +127,66 @@ const Room = () => {
           position: "relative",
         }}
       >
-       <div
-  style={{
-    position: "absolute",
-    top: "16px",
-    right: "20px",
-    zIndex: 2,
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    padding: "7px 10px",
-    border: "1px solid var(--border-color)",
-    borderRadius: "6px",
-    background: "var(--bg-tertiary)",
-    color: "var(--text-secondary)",
-    fontSize: "12px",
-  }}
->
-  <span>
-    Room code:{" "}
-    <strong style={{ color: "var(--text-primary)", letterSpacing: "0.08em" }}>
-      {roomId}
-    </strong>
-  </span>
+        <div
+          style={{
+            position: "absolute",
+            top: "16px",
+            right: "20px",
+            zIndex: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "7px 10px",
+            border: "1px solid var(--border-color)",
+            borderRadius: "6px",
+            background: "var(--bg-tertiary)",
+            color: "var(--text-secondary)",
+            fontSize: "12px",
+          }}
+        >
+          <span>
+            Room code:{" "}
+            <strong
+              style={{ color: "var(--text-primary)", letterSpacing: "0.08em" }}
+            >
+              {roomId}
+            </strong>
+          </span>
 
-  <button
-    type="button"
-    className="secondary-btn"
-    onClick={copyRoomCode}
-    style={{ padding: "3px 7px", fontSize: "11px" }}
-  >
-    {copied ? "Copied" : "Copy"}
-  </button>
-</div>
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={copyRoomCode}
+            style={{ padding: "3px 7px", fontSize: "11px" }}
+          >
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
 
-<ParticipantsSidebar
-  roomUsers={roomUsers}
-  isHost={access.isHost}
-  onGrantAccess={setParticipantAccess}
-  pendingRequests={accessRequests}
-/>
+        <ParticipantsSidebar
+          roomUsers={roomUsers}
+          isHost={access.isHost}
+          onGrantAccess={setParticipantAccess}
+          pendingRequests={accessRequests}
+        />
 
-{connectionError && (
-  <div
-    style={{
-      position: "absolute",
-      top: "16px",
-      left: "270px",
-      zIndex: 3,
-      padding: "8px 12px",
-      borderRadius: "6px",
-      background: "#3f1d24",
-      color: "#fecaca",
-      fontSize: "12px",
-    }}
-  >
-    {connectionError}
-  </div>
-)}
+        {connectionError && (
+          <div
+            style={{
+              position: "absolute",
+              top: "16px",
+              left: "270px",
+              zIndex: 3,
+              padding: "8px 12px",
+              borderRadius: "6px",
+              background: "#3f1d24",
+              color: "#fecaca",
+              fontSize: "12px",
+            }}
+          >
+            {connectionError}
+          </div>
+        )}
 
         <div
           style={{
@@ -245,14 +273,40 @@ const Room = () => {
                 minHeight: 0,
               }}
             >
-              <CodeEditor roomId={roomId} userId={user?.id} userName={user?.name} canEdit={access.canEdit} />
+              <CodeEditor
+                roomId={roomId}
+                userId={user?.id}
+                userName={user?.name}
+                canEdit={access.canEdit}
+              />
             </div>
           </div>
         </div>
         {!access.isHost && !access.canEdit && (
-          <div style={{ position: "absolute", bottom: "16px", right: "20px", zIndex: 3, padding: "10px", borderRadius: "6px", background: "var(--bg-tertiary)", border: "1px solid var(--border-color)" }}>
-            <button type="button" className="primary-btn" onClick={requestEditAccess}>Request edit access</button>
-            {requestMessage && <span style={{ marginLeft: "8px", fontSize: "12px" }}>{requestMessage}</span>}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "16px",
+              right: "20px",
+              zIndex: 3,
+              padding: "10px",
+              borderRadius: "6px",
+              background: "var(--bg-tertiary)",
+              border: "1px solid var(--border-color)",
+            }}
+          >
+            <button
+              type="button"
+              className="primary-btn"
+              onClick={requestEditAccess}
+            >
+              Request edit access
+            </button>
+            {requestMessage && (
+              <span style={{ marginLeft: "8px", fontSize: "12px" }}>
+                {requestMessage}
+              </span>
+            )}
           </div>
         )}
       </div>
