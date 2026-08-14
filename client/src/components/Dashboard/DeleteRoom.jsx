@@ -1,6 +1,6 @@
 import React from "react";
 
-const DeleteRoom = ({ roomName, onCancel }) => {
+const DeleteRoom = ({ roomName, onCancel, onConfirm, isDeleting }) => {
     return (
         <div>
             <p>
@@ -18,22 +18,22 @@ const DeleteRoom = ({ roomName, onCancel }) => {
                 <button
                     className="secondary-btn"
                     onClick={onCancel}
+                    disabled={isDeleting}
                 >
                     Cancel
                 </button>
 
                 <button
                     className="primary-btn"
-                    onClick={() => {
-                        alert(`${roomName} deleted`);
-                        onCancel();
-                    }}
+                    style={{ background: "#ef4444", borderColor: "#dc2626" }}
+                    onClick={onConfirm}
+                    disabled={isDeleting}
                 >
-                    Delete
+                    {isDeleting ? "Deleting..." : "Delete"}
                 </button>
             </div>
         </div>
     );
 };
 
-export default DeleteRoom;
+export default DeleteRoom;

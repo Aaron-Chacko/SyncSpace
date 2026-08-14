@@ -70,7 +70,7 @@ export async function login(req, res, next) {
     const { email, password } = req.body;
     if (!validEmail(email) || typeof password !== "string") return res.status(400).json({ message: "Email and password are required." });
 
-    const user = await User.findOne({ email: email.trim().toLowerCase() }).select("+failedLoginAttempts +lockUntil +refreshTokens");
+    const user = await User.findOne({ email: email.trim().toLowerCase() }).select("+password +failedLoginAttempts +lockUntil +refreshTokens");
     if (!user) return res.status(401).json({ message: "Invalid email or password." });
     if (user.lockUntil && user.lockUntil > new Date()) return res.status(423).json({ message: "Account temporarily locked. Please try again later." });
 

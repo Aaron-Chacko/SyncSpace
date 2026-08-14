@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { X } from "lucide-react";
 
 const Modal = ({
   isOpen,
@@ -39,18 +40,30 @@ const Modal = ({
         aria-labelledby="modal-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-header">
-          <h2 id="modal-title">{title}</h2>
-
+        {title ? (
+          <div className="modal-header">
+            <h2 id="modal-title">{title}</h2>
+            <button
+              type="button"
+              className="modal-close-btn"
+              onClick={onClose}
+              aria-label="Close modal"
+              title="Close"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        ) : (
           <button
-            className="modal-close-btn"
+            type="button"
+            className="modal-close-btn standalone-close"
             onClick={onClose}
             aria-label="Close modal"
             title="Close"
           >
-            ✕
+            <X size={18} />
           </button>
-        </div>
+        )}
 
         <div className="modal-body">
           {children}
