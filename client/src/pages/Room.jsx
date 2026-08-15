@@ -51,23 +51,29 @@ const Room = () => {
 
     console.log(`Joining room: ${roomId}`);
 
-    const joinRoom = () =>
+    const joinRoom = () => {
+      setConnectionError("");
+
       socket.emit(SOCKET_EVENTS.JOIN_ROOM, roomId, (result) => {
         if (!result?.ok) {
           setConnectionError(result?.error || "Unable to join this room.");
           return;
         }
-        setConnectionError("");
-        setRoomUsers(result.users);
-        setAccess({ isHost: result.isHost, canEdit: result.canEdit });
+
+        setRoomUsers(result.users || []);
+        setAccess({
+          isHost: Boolean(result.isHost),
+          canEdit: Boolean(result.canEdit),
+        });
       });
+    };
 
     if (socket.connected) joinRoom();
     socket.on("connect", joinRoom);
 
     const handleConnectionError = (error) => {
       setConnectionError(
-        error.message || "Unable to connect to real-time collaboration."
+        error.message || "Unable to connect to real-time collaboration.",
       );
     };
     socket.on("connect_error", handleConnectionError);
@@ -130,9 +136,9 @@ const Room = () => {
       { room: roomId },
       (result) => {
         setRequestMessage(
-          result.ok ? "Request sent to the host." : result.error
+          result.ok ? "Request sent to the host." : result.error,
         );
-      }
+      },
     );
   };
 
@@ -143,9 +149,9 @@ const Room = () => {
       (result) => {
         if (result.ok)
           setAccessRequests((requests) =>
-            requests.filter((request) => request.userId !== userId)
+            requests.filter((request) => request.userId !== userId),
           );
-      }
+      },
     );
   };
 
@@ -156,7 +162,10 @@ const Room = () => {
       text: text.trim(),
       senderId: user?.id || "me",
       senderName: user?.name || "Me",
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
     };
 
     setMessages((prev) => [...prev, message]);
@@ -183,9 +192,7 @@ const Room = () => {
         />
 
         {connectionError && (
-          <div className="room-connection-error-banner">
-            {connectionError}
-          </div>
+          <div className="room-connection-error-banner">{connectionError}</div>
         )}
 
         {copied && (
@@ -214,7 +221,11 @@ const Room = () => {
                   <span className="panel-title-text">WHITEBOARD</span>
                   <div className="drawing-user-badge">
                     <span className="drawing-dot"></span>
-                    <span>{roomUsers.length > 0 ? `${(roomUsers.find(u => !u.isHost) || roomUsers[0])?.name || "Someone"} is drawing` : "Whiteboard"}</span>
+                    <span>
+                      {roomUsers.length > 0
+                        ? `${(roomUsers.find((u) => !u.isHost) || roomUsers[0])?.name || "Someone"} is drawing`
+                        : "Whiteboard"}
+                    </span>
                   </div>
                 </div>
 
@@ -284,7 +295,12 @@ const Room = () => {
                   <div className="editor-bottom-status-bar">
                     <div className="user-editing-pill">
                       <div className="small-avatar">
-                        {(user?.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                        {(user?.name || "U")
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)}
                       </div>
                       <span>{user?.name || "You"} is editing</span>
                     </div>

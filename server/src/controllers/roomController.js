@@ -27,10 +27,8 @@ const createRoomCode = () => {
   for (let i = 0; i < 6; i += 1) {
     code += alphabet[crypto.randomInt(0, alphabet.length)];
   }
-
   return code;
 };
-
 export async function createRoom(req, res, next) {
   try {
     const { roomName, description = "" } = req.body;
