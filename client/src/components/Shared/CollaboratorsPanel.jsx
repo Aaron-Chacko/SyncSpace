@@ -21,13 +21,25 @@ const CollaboratorsPanel = ({
 }) => {
   const [activeTab, setActiveTab] = useState("collaborators");
   const [chatInput, setChatInput] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
   const chatEndRef = useRef(null);
+  const prevMessagesLength = useRef(messages.length);
 
   // Auto scroll to bottom of chat
   useEffect(() => {
     if (activeTab === "chat" && chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
+  }, [messages, activeTab]);
+
+  // Track unread messages
+  useEffect(() => {
+    if (activeTab === "chat") {
+      setUnreadCount(0);
+    } else if (messages.length > prevMessagesLength.current) {
+      setUnreadCount((prev) => prev + (messages.length - prevMessagesLength.current));
+    }
+    prevMessagesLength.current = messages.length;
   }, [messages, activeTab]);
 
   const handleSend = (e) => {
@@ -62,7 +74,11 @@ const CollaboratorsPanel = ({
           className={`panel-tab-btn ${activeTab === "chat" ? "active" : ""}`}
           onClick={() => setActiveTab("chat")}
         >
-          Chat {messages.length > 0 && `(${messages.length})`}
+          Chat {unreadCount > 0 ? (
+            <span className="chat-unread-badge">{unreadCount}</span>
+          ) : (
+            messages.length > 0 && `(${messages.length})`
+          )}
         </button>
       </div>
 

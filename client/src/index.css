@@ -3730,4 +3730,20 @@ a:focus-visible {
   cursor: not-allowed;
 }
 
+.chat-unread-badge {
+  background: #ef4444;
+  color: white;
+  font-size: 0.68rem;
+  padding: 1.5px 5.5px;
+  border-radius: 10px;
+  font-weight: 700;
+  margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  line-height: 1;
+}
+
 
