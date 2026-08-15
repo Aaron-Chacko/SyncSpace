@@ -24,8 +24,7 @@ const DeleteRoom = ({ roomName, onCancel, onConfirm, isDeleting }) => {
                 </button>
 
                 <button
-                    className="primary-btn"
-                    style={{ background: "#ef4444", borderColor: "#dc2626" }}
+                    className="danger-btn"
                     onClick={onConfirm}
                     disabled={isDeleting}
                 >
@@ -36,4 +35,4 @@ const DeleteRoom = ({ roomName, onCancel, onConfirm, isDeleting }) => {
     );
 };
 
-export default DeleteRoom;
+export default DeleteRoom;
