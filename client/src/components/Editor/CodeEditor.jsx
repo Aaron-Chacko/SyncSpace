@@ -7,6 +7,7 @@ import { useSocketContext } from '../../context/SocketContext';
 import LanguageSelector from './LanguageSelector';
 import { AlertCircle, X, Maximize2, Minimize2, GitBranch, RefreshCw, TerminalSquare } from 'lucide-react';
 import './Editor.css';
+import { useAuth } from '../../context/AuthContext';
 
 // ============================================
 // SUPPORTED LANGUAGES
@@ -300,6 +301,7 @@ const CodeEditor = ({
   canEdit = false,
   isReplayMode = false,
 }) => {
+  const { token } = useAuth();
   const socket = useSocketContext();
 
   // ----- STATE -----
@@ -651,6 +653,7 @@ const CodeEditor = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           language,

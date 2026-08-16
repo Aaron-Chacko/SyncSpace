@@ -4,6 +4,7 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import authMiddleware from "./middleware/authMiddleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -204,7 +205,7 @@ async function executeLocalCode(language, code, stdin) {
 
 /* -------------------- Code Execution Route -------------------- */
 
-  app.post("/api/execute", async (req, res) => {
+  app.post("/api/execute", authMiddleware, async (req, res) => {
   const { language, code, stdin = "" } = req.body;
 
   const supportedLanguages = [
