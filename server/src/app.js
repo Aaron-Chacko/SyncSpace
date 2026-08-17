@@ -57,6 +57,13 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/healthz", (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: "healthy",
+  });
+});
+
 /* -------------------- Local Code Runner Logic -------------------- */
 
 function runCommand(cmd, args, stdin, timeout = 3000) {
