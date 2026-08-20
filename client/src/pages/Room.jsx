@@ -156,7 +156,7 @@ const Room = () => {
   };
 
   const sendChatMessage = (text) => {
-    if (!socket || !roomId || !text.trim()) return;
+    if (!socket?.connected || !roomId || !text.trim()) return;
     const message = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
       text: text.trim(),
