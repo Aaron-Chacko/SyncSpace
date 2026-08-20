@@ -14,7 +14,9 @@
     "dev": "npx concurrently \"npm run dev:server\" \"npm run dev:client\""
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@vitejs/plugin-react": "^4.7.0",
+    "concurrently": "^8.2.2",
+    "vite": "^8.1.5"
   },
   "dependencies": {
     "lucide-react": "^1.28.0"
