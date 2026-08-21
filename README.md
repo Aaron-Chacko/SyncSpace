@@ -1,6 +1,10 @@
 # SyncSpace
 
-SyncSpace is a real-time collaborative whiteboard and code editor built using the MERN stack. It enables multiple users to draw, write code, and collaborate simultaneously within shared rooms using real-time synchronization.
+SyncSpace is a real-time collaborative workspace that combines a collaborative whiteboard and code editor. Multiple users can join shared rooms and work together in real time with synchronized changes.
+
+## Live Demo
+
+**Frontend:** https://client-self-one-32.vercel.app
 
 ---
 
@@ -23,6 +27,10 @@ SyncSpace is a real-time collaborative whiteboard and code editor built using th
 ### Database
 - MongoDB
 
+### Deployment
+- Vercel — Frontend
+- Render — Backend
+
 ---
 
 ## Features
@@ -31,16 +39,17 @@ SyncSpace is a real-time collaborative whiteboard and code editor built using th
 - Real-time collaborative code editor
 - Multi-user room support
 - Live synchronization using Socket.io
-- Conflict-free editing with Yjs
-- User authentication
+- Conflict-free collaborative editing using Yjs
+- User authentication using JWT
 - Session persistence
 - Replay previous collaboration sessions
+- Shared workspace for collaborative development
 
 ---
 
 ## Project Structure
 
-```
+```text
 syncspace/
 │
 ├── client/
@@ -48,82 +57,3 @@ syncspace/
 ├── docs/
 ├── README.md
 └── .gitignore
-```
-
----
-
-## Branches
-
-| Branch | Purpose |
-|---------|----------|
-| main | Stable integrated project |
-| integration | Project setup, Socket.io, Yjs, deployment, integration |
-| whiteboard | Whiteboard module |
-| editor | Code editor module |
-| backend | Express APIs & MongoDB |
-| auth | Authentication |
-| frontend-ui | UI & Dashboard |
-
----
-
-## Getting Started
-
-### Clone the repository
-
-```bash
-git clone <repository-url>
-```
-
-### Install dependencies
-
-#### Frontend
-
-```bash
-cd client
-npm install
-```
-
-#### Backend
-
-```bash
-cd server
-npm install
-```
-
-### Run the frontend
-
-```bash
-npm run dev
-```
-
-### Run the backend
-
-```bash
-npm run dev
-```
-
----
-
-## Team Workflow
-
-- Create a feature branch from `main`.
-- Work only on your assigned branch.
-- Commit changes regularly with meaningful commit messages.
-- Open a Pull Request to `main` after testing.
-- Pull the latest changes from `main` before continuing development.
-
----
-
-## Future Enhancements
-
-- Voice and video collaboration
-- File sharing
-- Export whiteboard as PDF/Image
-- Collaborative terminal
-- AI-assisted code suggestions
-
----
-
-## License
-
-This project is intended for academic and learning purposes.
