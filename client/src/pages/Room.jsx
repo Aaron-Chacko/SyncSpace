@@ -337,7 +337,7 @@ const Room = () => {
         <footer className="room-ide-footer-status">
           <div className="footer-status-left">
             <span className="green-dot"></span>
-            <span>Connected</span>
+            <span>{socket?.connected ? "Connected" : "Disconnected"}</span>
             <span className="divider">•</span>
             <span>Synced</span>
             <span className="divider">•</span>
